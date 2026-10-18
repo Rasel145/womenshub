@@ -25,13 +25,13 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <main className="mx-auto w-full max-w-6xl px-4 py-16 text-center">
-        <h1 className="mb-2 text-2xl font-bold">Apnar cart khali</h1>
-        <p className="mb-6 text-gray-500">Kichu product add korun.</p>
+        <h1 className="mb-2 text-2xl font-bold">Your cart is empty</h1>
+        <p className="mb-6 text-gray-500">Add some products to get started.</p>
         <Link
           href="/products"
           className="rounded-lg bg-pink-600 px-6 py-3 font-medium text-white hover:bg-pink-700"
         >
-          Shopping shuru korun
+          Start Shopping
         </Link>
       </main>
     );
@@ -77,7 +77,7 @@ export default function CartPage() {
                     <button
                       onClick={() => updateQuantity(item.key, item.quantity - 1)}
                       className="p-2"
-                      aria-label="Decrease"
+                      aria-label="Decrease quantity"
                     >
                       <Minus size={14} />
                     </button>
@@ -85,7 +85,7 @@ export default function CartPage() {
                     <button
                       onClick={() => updateQuantity(item.key, item.quantity + 1)}
                       className="p-2"
-                      aria-label="Increase"
+                      aria-label="Increase quantity"
                     >
                       <Plus size={14} />
                     </button>
@@ -98,7 +98,7 @@ export default function CartPage() {
                     <button
                       onClick={() => removeItem(item.key)}
                       className="text-gray-400 hover:text-red-600"
-                      aria-label="Remove"
+                      aria-label="Remove item"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -129,7 +129,7 @@ export default function CartPage() {
 
           {delivery > 0 && (
             <p className="mt-3 text-xs text-gray-500">
-              Aro {formatPrice(FREE_DELIVERY_OVER - subtotal)} er product nile delivery free.
+              Add {formatPrice(FREE_DELIVERY_OVER - subtotal)} more to get free delivery.
             </p>
           )}
 
@@ -137,7 +137,7 @@ export default function CartPage() {
             href="/checkout"
             className="mt-5 block rounded-lg bg-pink-600 py-3 text-center font-medium text-white hover:bg-pink-700"
           >
-            Checkout
+            Proceed to Checkout
           </Link>
         </aside>
       </div>

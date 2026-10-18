@@ -163,8 +163,8 @@ const addItem = useCart((s) => s.addItem);
           <div className="mt-8 border-t pt-5">
             <h2 className="mb-2 font-semibold">Description</h2>
             <p className="text-sm leading-relaxed text-gray-600">
-              {product.description ?? "Ei product-er description shigghroi add kora hobe."}
-            </p>
+  {product.description ?? "Product description coming soon."}
+</p>
           </div>
         </div>
       </div>

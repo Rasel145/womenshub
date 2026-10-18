@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import ProductDetail from "@/components/product/ProductDetail";
-import { products } from "@/data/products";
+import { getProductBySlug } from "@/lib/products";
 
 export default function ProductPage({
   params,
@@ -23,9 +23,9 @@ async function ProductContent({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = products.find((p) => p.slug === slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) notFound();
 
   return <ProductDetail product={product} />;
-}   
+}

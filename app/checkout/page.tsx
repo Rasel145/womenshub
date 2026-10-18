@@ -19,9 +19,9 @@ interface FormState {
 }
 
 const paymentOptions: { key: PaymentMethod; label: string; hint: string }[] = [
-  { key: "cod", label: "Cash on Delivery", hint: "Product haate peye taka din" },
-  { key: "bkash", label: "bKash", hint: "Online payment (pore connect hobe)" },
-  { key: "nagad", label: "Nagad", hint: "Online payment (pore connect hobe)" },
+  { key: "cod", label: "Cash on Delivery", hint: "Pay in cash when you receive your order" },
+  { key: "bkash", label: "bKash", hint: "Online payment (coming soon)" },
+  { key: "nagad", label: "Nagad", hint: "Online payment (coming soon)" },
 ];
 
 export default function CheckoutPage() {
@@ -50,13 +50,13 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <main className="mx-auto w-full max-w-6xl px-4 py-16 text-center">
-        <h1 className="mb-2 text-2xl font-bold">Cart khali</h1>
-        <p className="mb-6 text-gray-500">Checkout korar age kichu product add korun.</p>
+        <h1 className="mb-2 text-2xl font-bold">Your cart is empty</h1>
+        <p className="mb-6 text-gray-500">Add some products before checking out.</p>
         <Link
           href="/products"
           className="rounded-lg bg-pink-600 px-6 py-3 font-medium text-white hover:bg-pink-700"
         >
-          Shopping shuru korun
+          Start Shopping
         </Link>
       </main>
     );
@@ -73,11 +73,11 @@ export default function CheckoutPage() {
 
   function validate() {
     const next: Partial<Record<keyof FormState, string>> = {};
-    if (form.name.trim().length < 3) next.name = "Pura nam likhun";
+    if (form.name.trim().length < 3) next.name = "Enter your full name";
     if (!/^01[3-9]\d{8}$/.test(form.phone.trim()))
-      next.phone = "Shothik mobile number din (jemon 01712345678)";
-    if (form.address.trim().length < 10) next.address = "Puro thikana likhun";
-    if (form.city.trim().length < 2) next.city = "Jela/shohor likhun";
+      next.phone = "Enter a valid mobile number (e.g. 01712345678)";
+    if (form.address.trim().length < 10) next.address = "Enter your full address";
+    if (form.city.trim().length < 2) next.city = "Enter your city or district";
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -86,7 +86,7 @@ export default function CheckoutPage() {
     e.preventDefault();
     if (!validate()) return;
 
-    // Pore ekhane backend API call hobe. Ekhon fake order ID toiri kori.
+    // Backend API call will go here. Generate a fake order ID for now.
     const orderId = `WH-${Date.now().toString().slice(-6)}`;
 
     setPlaced(true);
@@ -107,6 +107,7 @@ export default function CheckoutPage() {
       <form
         onSubmit={handlePlaceOrder}
         className="grid gap-6 lg:grid-cols-[1fr_360px]"
+        noValidate
       >
         <div className="space-y-6">
           {/* Delivery info */}
@@ -115,7 +116,7 @@ export default function CheckoutPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-medium">Pura nam</label>
+                <label className="mb-1 block text-sm font-medium">Full name</label>
                 <input
                   value={form.name}
                   onChange={(e) => update("name", e.target.value)}
@@ -140,13 +141,13 @@ export default function CheckoutPage() {
             </div>
 
             <div className="mt-4">
-              <label className="mb-1 block text-sm font-medium">Puro thikana</label>
+              <label className="mb-1 block text-sm font-medium">Full address</label>
               <textarea
                 value={form.address}
                 onChange={(e) => update("address", e.target.value)}
                 className={inputClass("address")}
                 rows={3}
-                placeholder="Bari/flat, road, area"
+                placeholder="House/flat, road, area"
               />
               {errors.address && (
                 <p className="mt-1 text-xs text-red-600">{errors.address}</p>
@@ -154,7 +155,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="mt-4">
-              <label className="mb-1 block text-sm font-medium">Jela / Shohor</label>
+              <label className="mb-1 block text-sm font-medium">City / District</label>
               <input
                 value={form.city}
                 onChange={(e) => update("city", e.target.value)}
@@ -166,13 +167,13 @@ export default function CheckoutPage() {
 
             <div className="mt-4">
               <label className="mb-1 block text-sm font-medium">
-                Note (optional)
+                Order note <span className="text-gray-400">(optional)</span>
               </label>
               <input
                 value={form.note}
                 onChange={(e) => update("note", e.target.value)}
                 className={inputClass("note")}
-                placeholder="Delivery-r jonno kono bishesh nirdesh"
+                placeholder="Any special instructions for delivery"
               />
             </div>
           </section>
@@ -197,7 +198,7 @@ export default function CheckoutPage() {
                       onChange={() => setArea(key)}
                       className="accent-pink-600"
                     />
-                    {key === "dhaka" ? "Dhaka-r bhitore" : "Dhaka-r baire"}
+                    {key === "dhaka" ? "Inside Dhaka" : "Outside Dhaka"}
                   </span>
                   <span className="text-gray-500">
                     {formatPrice(DELIVERY_CHARGE[key])}
@@ -280,7 +281,7 @@ export default function CheckoutPage() {
             href="/cart"
             className="mt-3 block text-center text-sm text-gray-500 hover:text-pink-600"
           >
-            Cart-e phire jan
+            Back to cart
           </Link>
         </aside>
       </form>

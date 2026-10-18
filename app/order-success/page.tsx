@@ -26,21 +26,21 @@ async function SuccessContent({
   return (
     <>
       <CheckCircle size={64} className="mx-auto mb-4 text-green-500" />
-      <h1 className="mb-2 text-2xl font-bold">Order shofol hoyeche!</h1>
+      <h1 className="mb-2 text-2xl font-bold">Order placed successfully!</h1>
       {id && (
         <p className="mb-1 text-gray-600">
-          Apnar order number: <span className="font-semibold">#{id}</span>
+          Your order number: <span className="font-semibold">#{id}</span>
         </p>
       )}
       <p className="mb-8 text-sm text-gray-500">
-        Amra shigghroi apnar shathe jogajog korbo.
+        We will contact you shortly to confirm your order.
       </p>
       <div className="flex justify-center gap-3">
         <Link
           href="/products"
           className="rounded-lg bg-pink-600 px-6 py-3 font-medium text-white hover:bg-pink-700"
         >
-          Aro shopping korun
+          Continue Shopping
         </Link>
         <Link
           href="/account"

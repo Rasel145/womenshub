@@ -7,6 +7,8 @@ import { formatPrice } from "@/lib/utils";
 
 type Tab = "profile" | "orders" | "addresses";
 
+
+
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
 

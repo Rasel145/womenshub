@@ -1,9 +1,8 @@
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
-import ProductDetail from "@/components/product/ProductDetail";
-import { products } from "@/data/products";
+import ProductListing from "@/components/product/ProductListing";
+import { getProductsByCategory } from "@/lib/products";
 
-export default function ProductPage({
+export default function CategoryPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
@@ -11,21 +10,25 @@ export default function ProductPage({
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6">
       <Suspense fallback={<p className="text-gray-500">Loading...</p>}>
-        <ProductContent params={params} />
+        <CategoryContent params={params} />
       </Suspense>
     </main>
   );
 }
 
-async function ProductContent({
+async function CategoryContent({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = products.find((p) => p.slug === slug);
+  const products = await getProductsByCategory(slug);
+  const title = slug.replace(/-/g, " ");
 
-  if (!product) notFound();
-
-  return <ProductDetail product={product} />;
+  return (
+    <>
+      <h1 className="mb-6 text-2xl font-bold capitalize">{title}</h1>
+      <ProductListing products={products} />
+    </>
+  );
 }

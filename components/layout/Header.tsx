@@ -3,6 +3,7 @@ import CartCount from "./CartCount"
 import Link from "next/link";
 import { Search, ShoppingBag, User, Heart } from "lucide-react";
 
+
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b bg-white">
@@ -58,3 +59,6 @@ export default function Header() {
     </header>
   );
 }
+<Link href="/login" aria-label="Login">
+  <User size={22} />
+</Link>

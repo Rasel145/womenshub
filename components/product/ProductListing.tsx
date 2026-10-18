@@ -119,8 +119,8 @@ export default function ProductListing({ products }: { products: Product[] }) {
 
         {filtered.length === 0 ? (
           <p className="rounded-xl border p-8 text-center text-gray-500">
-            Kono product pawa jay ni. Filter change kore dekhun.
-          </p>
+  No products found. Try changing your filters.
+</p>
         ) : (
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
             {filtered.map((product) => (

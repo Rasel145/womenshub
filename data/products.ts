@@ -25,7 +25,7 @@ export const products: Product[] = [
     reviewCount: 128,
     inStock: true,
     description:
-      "Sensitive skin-er jonno mild, soap-free cleanser. Mukh porishkar kore, kintu skin-er natural moisture nosto kore na.",
+      "A mild, soap-free cleanser made for sensitive skin. Cleans gently without stripping your skin's natural moisture.",
     variants: ["125ml", "250ml", "500ml"],
   },
   {
@@ -38,7 +38,8 @@ export const products: Product[] = [
     rating: 4.8,
     reviewCount: 94,
     inStock: true,
-    description: "Ceramide o hyaluronic acid shomridho, 24 ghonta moisture dhore rakhe.",
+    description:  "Rich in ceramides and hyaluronic acid. Keeps skin moisturised for up to 24 hours.",
+
   },
   {
     id: "3",
@@ -52,7 +53,7 @@ export const products: Product[] = [
     reviewCount: 210,
     inStock: true,
     description:
-      "Long-lasting matte liquid lipstick, ek bar lagale pray 16 ghonta thake.",
+       "A long-lasting matte liquid lipstick. One application stays put for up to 16 hours.",
     variants: ["Pioneer", "Lover", "Ruler", "Believer"],
   },
   {
