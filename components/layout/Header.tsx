@@ -1,3 +1,5 @@
+
+import CartCount from "./CartCount"
 import Link from "next/link";
 import { Search, ShoppingBag, User, Heart } from "lucide-react";
 
@@ -38,9 +40,7 @@ export default function Header() {
           </Link>
           <Link href="/cart" aria-label="Cart" className="relative">
             <ShoppingBag size={22} />
-            <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-pink-600 text-[10px] text-white">
-              0
-            </span>
+            <CartCount />
           </Link>
         </nav>
       </div>

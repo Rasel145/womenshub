@@ -1,11 +1,12 @@
 "use client";
-
+import { useCart } from "@/store/cart";
 import { useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { Star, Minus, Plus, Heart } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/utils";
+
 
 export default function ProductDetail({ product }: { product: Product }) {
   const [variant, setVariant] = useState(product.variants?.[0]);
@@ -18,13 +19,13 @@ export default function ProductDetail({ product }: { product: Product }) {
 
   // Pore real image URL diye replace hobe
   const images = [0, 1, 2, 3];
+const addItem = useCart((s) => s.addItem);
+
 
   function handleAddToCart() {
-    // Pore Zustand cart-e connect hobe
-    alert(
-      `${quantity} x ${product.name}${variant ? ` (${variant})` : ""} added`
-    );
-  }
+  addItem(product, variant, quantity);
+  setQuantity(1);
+}
 
   return (
     <div>

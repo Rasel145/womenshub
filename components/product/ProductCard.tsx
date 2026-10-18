@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/utils";
+import AddToCartButton from "./AddToCartButton";
 
 export default function ProductCard({ product }: { product: Product }) {
   const discount = product.oldPrice
@@ -44,12 +45,7 @@ export default function ProductCard({ product }: { product: Product }) {
         )}
       </div>
 
-      <button
-        disabled={!product.inStock}
-        className="mt-3 rounded-lg bg-pink-600 py-2 text-sm font-medium text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-      >
-        {product.inStock ? "Add to Cart" : "Out of Stock"}
-      </button>
+      <AddToCartButton product={product} />
     </div>
   );
 }
