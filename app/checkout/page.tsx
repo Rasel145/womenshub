@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { useCart } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { DeliveryArea, getDeliveryCharge, DELIVERY_CHARGE } from "@/lib/delivery";
+import { placeOrder } from "@/app/actions/orders";
 
 type PaymentMethod = "cod" | "bkash" | "nagad";
 
@@ -18,10 +19,20 @@ interface FormState {
   note: string;
 }
 
-const paymentOptions: { key: PaymentMethod; label: string; hint: string }[] = [
-  { key: "cod", label: "Cash on Delivery", hint: "Pay in cash when you receive your order" },
-  { key: "bkash", label: "bKash", hint: "Online payment (coming soon)" },
-  { key: "nagad", label: "Nagad", hint: "Online payment (coming soon)" },
+const paymentOptions: {
+  key: PaymentMethod;
+  label: string;
+  hint: string;
+  available: boolean;
+}[] = [
+  {
+    key: "cod",
+    label: "Cash on Delivery",
+    hint: "Pay in cash when you receive your order",
+    available: true,
+  },
+  { key: "bkash", label: "bKash", hint: "Coming soon", available: false },
+  { key: "nagad", label: "Nagad", hint: "Coming soon", available: false },
 ];
 
 export default function CheckoutPage() {
@@ -30,6 +41,8 @@ export default function CheckoutPage() {
 
   const [mounted, setMounted] = useState(false);
   const [placed, setPlaced] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [area, setArea] = useState<DeliveryArea>("dhaka");
   const [payment, setPayment] = useState<PaymentMethod>("cod");
   const [form, setForm] = useState<FormState>({
@@ -82,16 +95,39 @@ export default function CheckoutPage() {
     return Object.keys(next).length === 0;
   }
 
-  function handlePlaceOrder(e: React.FormEvent) {
+  async function handlePlaceOrder(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    if (submitting || !validate()) return;
 
-    // Backend API call will go here. Generate a fake order ID for now.
-    const orderId = `WH-${Date.now().toString().slice(-6)}`;
+    setSubmitting(true);
+    setServerError(null);
+
+    const result = await placeOrder({
+      customer: {
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+        city: form.city.trim(),
+        note: form.note.trim() || undefined,
+      },
+      area,
+      payment,
+      items: items.map((i) => ({
+        productId: i.product.id,
+        variant: i.variant,
+        quantity: i.quantity,
+      })),
+    });
+
+    if (!result.ok) {
+      setServerError(result.error);
+      setSubmitting(false);
+      return;
+    }
 
     setPlaced(true);
     clearCart();
-    router.push(`/order-success?id=${orderId}`);
+    router.push(`/order-success?id=${result.orderNumber}`);
   }
 
   const inputClass = (field: keyof FormState) =>
@@ -174,6 +210,7 @@ export default function CheckoutPage() {
                 onChange={(e) => update("note", e.target.value)}
                 className={inputClass("note")}
                 placeholder="Any special instructions for delivery"
+                maxLength={300}
               />
             </div>
           </section>
@@ -216,7 +253,8 @@ export default function CheckoutPage() {
                 <label
                   key={opt.key}
                   className={clsx(
-                    "flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm",
+                    "flex items-start gap-3 rounded-lg border p-3 text-sm",
+                    opt.available ? "cursor-pointer" : "cursor-not-allowed opacity-50",
                     payment === opt.key && "border-pink-600 bg-pink-50"
                   )}
                 >
@@ -224,6 +262,7 @@ export default function CheckoutPage() {
                     type="radio"
                     name="payment"
                     checked={payment === opt.key}
+                    disabled={!opt.available}
                     onChange={() => setPayment(opt.key)}
                     className="mt-0.5 accent-pink-600"
                   />
@@ -270,11 +309,18 @@ export default function CheckoutPage() {
             </div>
           </dl>
 
+          {serverError && (
+            <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              {serverError}
+            </p>
+          )}
+
           <button
             type="submit"
-            className="mt-5 w-full rounded-lg bg-pink-600 py-3 font-medium text-white transition hover:bg-pink-700"
+            disabled={submitting}
+            className="mt-5 w-full rounded-lg bg-pink-600 py-3 font-medium text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:bg-pink-300"
           >
-            Place Order
+            {submitting ? "Placing order..." : "Place Order"}
           </button>
 
           <Link
