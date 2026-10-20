@@ -42,6 +42,7 @@ model User {
   orders       Order[]
   sessions     Session[]
   passwordResets PasswordReset[]
+  wishlist       WishlistItem[]
 }
 
 model Category {
@@ -77,6 +78,7 @@ model Product {
   brand       Brand       @relation(fields: [brandId], references: [id])
   createdAt   DateTime    @default(now())
   orderItems  OrderItem[]
+  wishlistedBy WishlistItem[]
 }
 
 model Order {
@@ -130,5 +132,17 @@ model PasswordReset {
   expiresAt DateTime
   createdAt DateTime @default(now())
 
+  @@index([userId])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
   @@index([userId])
 }

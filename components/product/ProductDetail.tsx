@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { Star, Minus, Plus, Heart } from "lucide-react";
+import { Star, Minus, Plus } from "lucide-react";
+import WishlistButton from "./WishlistButton";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/store/cart";
@@ -135,7 +136,7 @@ export default function ProductDetail({ product }: { product: Product }) {
             </div>
           )}
 
-          {/* Quantity + Add to cart */}
+          {/* Quantity + Add to cart + Wishlist */}
           <div className="mt-6 flex items-center gap-3">
             <div className="flex items-center rounded-lg border">
               <button
@@ -165,12 +166,7 @@ export default function ProductDetail({ product }: { product: Product }) {
               {product.inStock ? "Add to Cart" : "Out of Stock"}
             </button>
 
-            <button
-              className="rounded-lg border p-3 hover:bg-gray-50"
-              aria-label="Add to wishlist"
-            >
-              <Heart size={20} />
-            </button>
+            <WishlistButton productId={product.id} variant="detail" />
           </div>
 
           {/* Description */}

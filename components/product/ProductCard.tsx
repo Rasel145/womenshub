@@ -3,6 +3,7 @@ import { Star } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import AddToCartButton from "./AddToCartButton";
+import WishlistButton from "./WishlistButton";
 
 export default function ProductCard({ product }: { product: Product }) {
   const discount = product.oldPrice
@@ -11,7 +12,9 @@ export default function ProductCard({ product }: { product: Product }) {
   const image = product.images?.[0];
 
   return (
-    <div className="group flex flex-col rounded-xl border bg-white p-3 transition hover:shadow-md">
+    <div className="group relative flex flex-col rounded-xl border bg-white p-3 transition hover:shadow-md">
+      <WishlistButton productId={product.id} variant="card" />
+
       <Link href={`/products/${product.slug}`}>
         <div className="relative mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-pink-50 text-4xl font-bold text-pink-300">
           {image ? (

@@ -3,12 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { LayoutDashboard, ShoppingBag, Package, ArrowLeft } from "lucide-react";
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Package,
+  Users,
+  ArrowLeft,
+} from "lucide-react";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag, exact: false },
   { href: "/admin/products", label: "Products", icon: Package, exact: false },
+  { href: "/admin/customers", label: "Customers", icon: Users, exact: false },
 ];
 
 export default function AdminNav() {
