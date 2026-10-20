@@ -65,3 +65,29 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   });
   return row ? toProduct(row) : null;
 }
+
+// Every word must match the name, brand, category or description
+export async function searchProducts(query: string, limit = 60): Promise<Product[]> {
+  await connection();
+
+  const terms = query.split(/\s+/).filter(Boolean).slice(0, 5);
+
+  const rows = await prisma.product.findMany({
+    where: {
+      isActive: true,
+      AND: terms.map((term) => ({
+        OR: [
+          { name: { contains: term, mode: "insensitive" as const } },
+          { brand: { name: { contains: term, mode: "insensitive" as const } } },
+          { category: { name: { contains: term, mode: "insensitive" as const } } },
+          { description: { contains: term, mode: "insensitive" as const } },
+        ],
+      })),
+    },
+    include,
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
+  return rows.map(toProduct);
+}

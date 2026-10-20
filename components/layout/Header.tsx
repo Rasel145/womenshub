@@ -1,9 +1,8 @@
 import { Suspense } from "react";
-import UserMenu from "./UserMenu";
-import CartCount from "./CartCount"
 import Link from "next/link";
 import { Search, ShoppingBag, User, Heart } from "lucide-react";
-
+import UserMenu from "./UserMenu";
+import CartCount from "./CartCount";
 
 export default function Header() {
   return (
@@ -14,32 +13,55 @@ export default function Header() {
       </div>
 
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-       <Link href="/" className="text-xl font-bold text-pink-600">
-  WomensHub
-</Link> 
+        <Link href="/" className="text-xl font-bold text-pink-600">
+          WomensHub
+        </Link>
 
         {/* Search (desktop) */}
-        <form className="hidden flex-1 md:block">
+        <form
+          action="/search"
+          method="get"
+          role="search"
+          className="hidden flex-1 md:block"
+        >
           <div className="relative">
             <input
-              type="text"
+              type="search"
+              name="q"
+              maxLength={50}
               placeholder="Search products, brands..."
               className="w-full rounded-full border bg-gray-50 py-2 pl-4 pr-10 text-sm outline-none focus:border-pink-500"
             />
-            <Search
-              size={18}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
+            <button
+              type="submit"
+              aria-label="Search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-600"
+            >
+              <Search size={18} />
+            </button>
           </div>
         </form>
 
         <nav className="ml-auto flex items-center gap-4">
+          {/* Search (mobile) */}
+          <Link href="/search" aria-label="Search" className="md:hidden">
+            <Search size={22} />
+          </Link>
+
           <Link href="/wishlist" aria-label="Wishlist">
             <Heart size={22} />
           </Link>
-          <Link href="/account" aria-label="Account">
-            <User size={22} />
-          </Link>
+
+          <Suspense
+            fallback={
+              <Link href="/login" aria-label="Account">
+                <User size={22} />
+              </Link>
+            }
+          >
+            <UserMenu />
+          </Suspense>
+
           <Link href="/cart" aria-label="Cart" className="relative">
             <ShoppingBag size={22} />
             <CartCount />
@@ -49,25 +71,14 @@ export default function Header() {
 
       {/* Category links */}
       <div className="border-t">
-        <ul className="mx-auto flex max-w-6xl gap-5 overflow-x-auto px-4 py-2 text-sm whitespace-nowrap">
+        <ul className="mx-auto flex max-w-6xl gap-5 overflow-x-auto whitespace-nowrap px-4 py-2 text-sm">
           <li><Link href="/category/skincare">Skincare</Link></li>
           <li><Link href="/category/makeup">Makeup</Link></li>
           <li><Link href="/category/haircare">Haircare</Link></li>
           <li><Link href="/category/fragrance">Fragrance</Link></li>
-          <li><Link href="/category/bath-body">Bath & Body</Link></li>
+          <li><Link href="/category/bath-body">Bath &amp; Body</Link></li>
         </ul>
       </div>
     </header>
   );
 }
-<Link href="/login" aria-label="Login">
-  <Suspense
-  fallback={
-    <Link href="/login" aria-label="Account">
-      <User size={22} />
-    </Link>
-  }
->
-  <UserMenu />
-</Suspense>
-</Link>
