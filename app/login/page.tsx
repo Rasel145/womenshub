@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
 import PasswordInput from "@/components/ui/PasswordInput";
+import { loginAction } from "@/app/actions/auth";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ identifier?: string; password?: string }>({});
+  const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   function validate() {
@@ -20,7 +20,7 @@ export default function LoginPage() {
     const isEmail = /^\S+@\S+\.\S+$/.test(id);
 
     if (!isPhone && !isEmail) next.identifier = "Enter a valid mobile number or email";
-    if (password.length < 6) next.password = "Password must be at least 6 characters";
+    if (!password) next.password = "Enter your password";
 
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -28,12 +28,17 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    if (loading || !validate()) return;
 
     setLoading(true);
-    // Backend login API call will go here. Fake delay for now.
-    await new Promise((r) => setTimeout(r, 800));
-    router.push("/account");
+    setServerError(null);
+
+    // On success the server redirects to /account, so we only handle errors here
+    const result = await loginAction({ identifier, password });
+    if (result && !result.ok) {
+      setServerError(result.error);
+      setLoading(false);
+    }
   }
 
   return (
@@ -88,6 +93,10 @@ export default function LoginPage() {
               <p className="mt-1 text-xs text-red-600">{errors.password}</p>
             )}
           </div>
+
+          {serverError && (
+            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{serverError}</p>
+          )}
 
           <button
             type="submit"

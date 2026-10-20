@@ -8,13 +8,23 @@ export default function ProductCard({ product }: { product: Product }) {
   const discount = product.oldPrice
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : 0;
+  const image = product.images?.[0];
 
   return (
     <div className="group flex flex-col rounded-xl border bg-white p-3 transition hover:shadow-md">
       <Link href={`/products/${product.slug}`}>
-        {/* Image placeholder (pore real image hobe) */}
-        <div className="relative mb-3 flex aspect-square items-center justify-center rounded-lg bg-pink-50 text-4xl font-bold text-pink-300">
-          {product.brand[0]}
+        <div className="relative mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-pink-50 text-4xl font-bold text-pink-300">
+          {image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={image}
+              alt={product.name}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            product.brand[0]
+          )}
           {discount > 0 && (
             <span className="absolute left-2 top-2 rounded bg-pink-600 px-1.5 py-0.5 text-xs font-medium text-white">
               -{discount}%

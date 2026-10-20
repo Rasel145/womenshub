@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
 import PasswordInput from "@/components/ui/PasswordInput";
+import { registerAction } from "@/app/actions/auth";
 
 interface FormState {
   name: string;
@@ -17,7 +17,6 @@ interface FormState {
 type Errors = Partial<Record<keyof FormState | "terms", string>>;
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [form, setForm] = useState<FormState>({
     name: "",
     phone: "",
@@ -27,6 +26,7 @@ export default function RegisterPage() {
   });
   const [agreed, setAgreed] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
+  const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   function update(field: keyof FormState, value: string) {
@@ -42,8 +42,8 @@ export default function RegisterPage() {
       next.phone = "Enter a valid mobile number (e.g. 01712345678)";
     if (form.email.trim() && !/^\S+@\S+\.\S+$/.test(form.email.trim()))
       next.email = "Enter a valid email address";
-    if (form.password.length < 6)
-      next.password = "Password must be at least 6 characters";
+    if (form.password.length < 8)
+      next.password = "Password must be at least 8 characters";
     if (form.confirm !== form.password) next.confirm = "Passwords do not match";
     if (!agreed) next.terms = "You must accept the terms to continue";
 
@@ -53,12 +53,22 @@ export default function RegisterPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    if (loading || !validate()) return;
 
     setLoading(true);
-    // Backend register API call will go here. Fake delay for now.
-    await new Promise((r) => setTimeout(r, 800));
-    router.push("/account");
+    setServerError(null);
+
+    // On success the server redirects to /account, so we only handle errors here
+    const result = await registerAction({
+      name: form.name,
+      phone: form.phone,
+      email: form.email || undefined,
+      password: form.password,
+    });
+    if (result && !result.ok) {
+      setServerError(result.error);
+      setLoading(false);
+    }
   }
 
   const inputClass = (field: keyof FormState) =>
@@ -124,7 +134,7 @@ export default function RegisterPage() {
               onChange={(v) => update("password", v)}
               hasError={!!errors.password}
               autoComplete="new-password"
-              placeholder="At least 6 characters"
+              placeholder="At least 8 characters"
             />
             {errors.password && (
               <p className="mt-1 text-xs text-red-600">{errors.password}</p>
@@ -160,6 +170,10 @@ export default function RegisterPage() {
             </label>
             {errors.terms && <p className="mt-1 text-xs text-red-600">{errors.terms}</p>}
           </div>
+
+          {serverError && (
+            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{serverError}</p>
+          )}
 
           <button
             type="submit"

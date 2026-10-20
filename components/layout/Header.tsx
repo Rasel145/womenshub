@@ -1,4 +1,5 @@
-
+import { Suspense } from "react";
+import UserMenu from "./UserMenu";
 import CartCount from "./CartCount"
 import Link from "next/link";
 import { Search, ShoppingBag, User, Heart } from "lucide-react";
@@ -60,5 +61,13 @@ export default function Header() {
   );
 }
 <Link href="/login" aria-label="Login">
-  <User size={22} />
+  <Suspense
+  fallback={
+    <Link href="/login" aria-label="Account">
+      <User size={22} />
+    </Link>
+  }
+>
+  <UserMenu />
+</Suspense>
 </Link>

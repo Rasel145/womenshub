@@ -53,9 +53,18 @@ export default function CartPage() {
             <li key={item.key} className="flex gap-4 rounded-xl border bg-white p-4">
               <Link
                 href={`/products/${item.product.slug}`}
-                className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-pink-50 text-2xl font-bold text-pink-300"
+                className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-pink-50 text-2xl font-bold text-pink-300"
               >
-                {item.product.brand[0]}
+                {item.product.images?.[0] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.product.images[0]}
+                    alt={item.product.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  item.product.brand[0]
+                )}
               </Link>
 
               <div className="flex flex-1 flex-col justify-between">

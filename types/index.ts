@@ -46,5 +46,6 @@ export interface Product {
   reviewCount: number;
   inStock: boolean;
   description?: string;   // notun
-  variants?: string[];    // notun (shade ba size)
+  variants?: string[];  
+  images?: string[];  // notun (shade ba size)
 }

@@ -1,31 +1,31 @@
 "use client";
-import { useCart } from "@/store/cart";
+
 import { useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { Star, Minus, Plus, Heart } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/utils";
-
+import { useCart } from "@/store/cart";
 
 export default function ProductDetail({ product }: { product: Product }) {
   const [variant, setVariant] = useState(product.variants?.[0]);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
 
+  const addItem = useCart((s) => s.addItem);
+
+  const images = product.images ?? [];
+  const mainImage = images[activeImage];
+
   const discount = product.oldPrice
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : 0;
 
-  // Pore real image URL diye replace hobe
-  const images = [0, 1, 2, 3];
-const addItem = useCart((s) => s.addItem);
-
-
   function handleAddToCart() {
-  addItem(product, variant, quantity);
-  setQuantity(1);
-}
+    addItem(product, variant, quantity);
+    setQuantity(1);
+  }
 
   return (
     <div>
@@ -41,28 +41,42 @@ const addItem = useCart((s) => s.addItem);
       <div className="grid gap-8 md:grid-cols-2">
         {/* Gallery */}
         <div>
-          <div className="relative flex aspect-square items-center justify-center rounded-xl bg-pink-50 text-8xl font-bold text-pink-300">
-            {product.brand[0]}
+          <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-pink-50 text-8xl font-bold text-pink-300">
+            {mainImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={mainImage}
+                alt={product.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              product.brand[0]
+            )}
             {discount > 0 && (
               <span className="absolute left-3 top-3 rounded bg-pink-600 px-2 py-1 text-sm font-medium text-white">
                 -{discount}%
               </span>
             )}
           </div>
-          <div className="mt-3 grid grid-cols-4 gap-2">
-            {images.map((i) => (
-              <button
-                key={i}
-                onClick={() => setActiveImage(i)}
-                className={clsx(
-                  "flex aspect-square items-center justify-center rounded-lg border-2 bg-pink-50 text-xl font-bold text-pink-300",
-                  activeImage === i ? "border-pink-600" : "border-transparent"
-                )}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
+
+          {images.length > 1 && (
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {images.map((url, i) => (
+                <button
+                  key={url}
+                  onClick={() => setActiveImage(i)}
+                  aria-label={`Show image ${i + 1}`}
+                  className={clsx(
+                    "aspect-square overflow-hidden rounded-lg border-2 bg-pink-50",
+                    activeImage === i ? "border-pink-600" : "border-transparent"
+                  )}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Info */}
@@ -163,8 +177,8 @@ const addItem = useCart((s) => s.addItem);
           <div className="mt-8 border-t pt-5">
             <h2 className="mb-2 font-semibold">Description</h2>
             <p className="text-sm leading-relaxed text-gray-600">
-  {product.description ?? "Product description coming soon."}
-</p>
+              {product.description ?? "Product description coming soon."}
+            </p>
           </div>
         </div>
       </div>

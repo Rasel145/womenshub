@@ -1,4 +1,4 @@
-        import { connection } from "next/server";
+import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "../generated/prisma/client";
 import type { Product } from "@/types";
@@ -21,14 +21,28 @@ function toProduct(p: DbProduct): Product {
     inStock: p.stock > 0,
     description: p.description ?? undefined,
     variants: p.variants.length > 0 ? p.variants : undefined,
+    images: p.images.length > 0 ? p.images : undefined,
   };
 }
 
 export async function getProducts(): Promise<Product[]> {
   await connection(); // always fetch fresh data on each request
   const rows = await prisma.product.findMany({
+    where: { isActive: true },
     include,
     orderBy: { createdAt: "asc" },
+  });
+  return rows.map(toProduct);
+}
+
+// Newest products first, used on the homepage
+export async function getLatestProducts(limit = 8): Promise<Product[]> {
+  await connection();
+  const rows = await prisma.product.findMany({
+    where: { isActive: true },
+    include,
+    orderBy: { createdAt: "desc" },
+    take: limit,
   });
   return rows.map(toProduct);
 }
@@ -36,7 +50,7 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductsByCategory(slug: string): Promise<Product[]> {
   await connection();
   const rows = await prisma.product.findMany({
-    where: { category: { slug } },
+    where: { isActive: true, category: { slug } },
     include,
     orderBy: { createdAt: "asc" },
   });
@@ -45,6 +59,9 @@ export async function getProductsByCategory(slug: string): Promise<Product[]> {
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   await connection();
-  const row = await prisma.product.findUnique({ where: { slug }, include });
+  const row = await prisma.product.findFirst({
+    where: { slug, isActive: true },
+    include,
+  });
   return row ? toProduct(row) : null;
 }

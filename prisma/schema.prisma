@@ -40,6 +40,7 @@ model User {
   role         Role     @default(CUSTOMER)
   createdAt    DateTime @default(now())
   orders       Order[]
+  sessions     Session[]
 }
 
 model Category {
@@ -66,8 +67,10 @@ model Product {
   rating      Float       @default(0)
   reviewCount Int         @default(0)
   stock       Int         @default(0)
+  isActive    Boolean     @default(true)
   variants    String[]
   categoryId  String
+  images      String[]    @default([])
   brandId     String
   category    Category    @relation(fields: [categoryId], references: [id])
   brand       Brand       @relation(fields: [brandId], references: [id])
@@ -105,4 +108,15 @@ model OrderItem {
   variant     String?
   unitPrice   Int
   quantity    Int
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
