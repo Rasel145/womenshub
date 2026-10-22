@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import ProductDetail from "@/components/product/ProductDetail";
+import ProductReviews from "@/components/product/ProductReviews";
 import { getProductBySlug } from "@/lib/products";
 
 export default function ProductPage({
@@ -27,5 +28,16 @@ async function ProductContent({
 
   if (!product) notFound();
 
-  return <ProductDetail product={product} />;
+  return (
+    <>
+      <ProductDetail product={product} />
+
+      {/* Reviews load separately, so the product shows first */}
+      <Suspense
+        fallback={<p className="mt-12 text-sm text-gray-500">Loading reviews...</p>}
+      >
+        <ProductReviews productId={product.id} />
+      </Suspense>
+    </>
+  );
 }

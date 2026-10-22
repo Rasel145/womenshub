@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { Star, Minus, Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import WishlistButton from "./WishlistButton";
+import StarRating from "./StarRating";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/store/cart";
@@ -85,10 +86,21 @@ export default function ProductDetail({ product }: { product: Product }) {
           <p className="text-sm text-gray-500">{product.brand}</p>
           <h1 className="mt-1 text-2xl font-bold">{product.name}</h1>
 
-          <div className="mt-2 flex items-center gap-1 text-sm text-gray-600">
-            <Star size={16} className="fill-yellow-400 text-yellow-400" />
-            <span className="font-medium">{product.rating}</span>
-            <span>({product.reviewCount} reviews)</span>
+          <div className="mt-2 text-sm text-gray-600">
+            {product.reviewCount > 0 ? (
+              <a href="#reviews" className="inline-flex items-center gap-2 hover:text-pink-600">
+                <StarRating value={product.rating} />
+                <span className="font-medium">{product.rating}</span>
+                <span>
+                  ({product.reviewCount}{" "}
+                  {product.reviewCount === 1 ? "review" : "reviews"})
+                </span>
+              </a>
+            ) : (
+              <a href="#reviews" className="text-gray-500 hover:text-pink-600">
+                No reviews yet
+              </a>
+            )}
           </div>
 
           <div className="mt-4 flex items-baseline gap-3">

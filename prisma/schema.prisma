@@ -43,6 +43,7 @@ model User {
   sessions     Session[]
   passwordResets PasswordReset[]
   wishlist       WishlistItem[]
+  reviews        Review[]
 }
 
 model Category {
@@ -80,6 +81,7 @@ model Product {
   createdAt   DateTime    @default(now())
   orderItems  OrderItem[]
   wishlistedBy WishlistItem[]
+  reviews      Review[]
 }
 
 model Order {
@@ -146,4 +148,21 @@ model WishlistItem {
 
   @@unique([userId, productId])
   @@index([userId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int
+  title     String?
+  comment   String
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+  @@index([productId, isVisible, createdAt])
 }

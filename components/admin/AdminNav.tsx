@@ -9,6 +9,7 @@ import {
   Package,
   Tags,
   Users,
+  MessageSquare,
   ArrowLeft,
 } from "lucide-react";
 
@@ -18,6 +19,7 @@ const links = [
   { href: "/admin/products", label: "Products", icon: Package, exact: false },
   { href: "/admin/categories", label: "Categories", icon: Tags, exact: false },
   { href: "/admin/customers", label: "Customers", icon: Users, exact: false },
+  { href: "/admin/reviews", label: "Reviews", icon: MessageSquare, exact: false },
 ];
 
 export default function AdminNav() {

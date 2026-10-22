@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Star } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import AddToCartButton from "./AddToCartButton";
 import WishlistButton from "./WishlistButton";
+import StarRating from "./StarRating";
 
 export default function ProductCard({ product }: { product: Product }) {
   const discount = product.oldPrice
@@ -41,11 +41,17 @@ export default function ProductCard({ product }: { product: Product }) {
         </h3>
       </Link>
 
-      <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
-        <Star size={14} className="fill-yellow-400 text-yellow-400" />
-        <span>{product.rating}</span>
-        <span>({product.reviewCount})</span>
-      </div>
+      {product.reviewCount > 0 ? (
+        <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+          <StarRating value={product.rating} size={14} />
+          <span>{product.rating}</span>
+          <span>({product.reviewCount})</span>
+        </div>
+      ) : (
+        <div className="mt-1 h-[14px] text-xs leading-[14px] text-gray-400">
+          No reviews yet
+        </div>
+      )}
 
       <div className="mt-2 flex items-baseline gap-2">
         <span className="font-semibold text-pink-600">
