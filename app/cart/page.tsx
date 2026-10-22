@@ -6,6 +6,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { FREE_DELIVERY_OVER, DELIVERY_CHARGE } from "@/lib/delivery";
+import T from "@/components/i18n/T";
 
 export default function CartPage() {
   const [mounted, setMounted] = useState(false);
@@ -14,7 +15,11 @@ export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart } = useCart();
 
   if (!mounted) {
-    return <main className="mx-auto w-full max-w-6xl px-4 py-6">Loading...</main>;
+    return (
+      <main className="mx-auto w-full max-w-6xl px-4 py-6">
+        <T>Loading...</T>
+      </main>
+    );
   }
 
   const subtotal = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
@@ -25,13 +30,17 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <main className="mx-auto w-full max-w-6xl px-4 py-16 text-center">
-        <h1 className="mb-2 text-2xl font-bold">Your cart is empty</h1>
-        <p className="mb-6 text-gray-500">Add some products to get started.</p>
+        <h1 className="mb-2 text-2xl font-bold">
+          <T>Your cart is empty</T>
+        </h1>
+        <p className="mb-6 text-gray-500">
+          <T>Add some products to get started.</T>
+        </p>
         <Link
           href="/products"
           className="rounded-lg bg-pink-600 px-6 py-3 font-medium text-white hover:bg-pink-700"
         >
-          Start Shopping
+          <T>Start Shopping</T>
         </Link>
       </main>
     );
@@ -40,9 +49,11 @@ export default function CartPage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Shopping Cart</h1>
+        <h1 className="text-2xl font-bold">
+          <T>Shopping Cart</T>
+        </h1>
         <button onClick={clearCart} className="text-sm text-red-600">
-          Clear cart
+          <T>Clear cart</T>
         </button>
       </div>
 
@@ -77,7 +88,9 @@ export default function CartPage() {
                     {item.product.name}
                   </Link>
                   {item.variant && (
-                    <p className="text-xs text-gray-500">Option: {item.variant}</p>
+                    <p className="text-xs text-gray-500">
+                      <T>Option:</T> {item.variant}
+                    </p>
                   )}
                 </div>
 
@@ -120,25 +133,35 @@ export default function CartPage() {
 
         {/* Summary */}
         <aside className="h-fit rounded-xl border bg-white p-5">
-          <h2 className="mb-4 font-semibold">Order Summary</h2>
+          <h2 className="mb-4 font-semibold">
+            <T>Order Summary</T>
+          </h2>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-gray-500">Subtotal</dt>
+              <dt className="text-gray-500">
+                <T>Subtotal</T>
+              </dt>
               <dd>{formatPrice(subtotal)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-500">Delivery</dt>
-              <dd>{delivery === 0 ? "Free" : formatPrice(delivery)}</dd>
+              <dt className="text-gray-500">
+                <T>Delivery</T>
+              </dt>
+              <dd>{delivery === 0 ? <T>Free</T> : formatPrice(delivery)}</dd>
             </div>
             <div className="flex justify-between border-t pt-3 text-base font-semibold">
-              <dt>Total</dt>
+              <dt>
+                <T>Total</T>
+              </dt>
               <dd className="text-pink-600">{formatPrice(total)}</dd>
             </div>
           </dl>
 
           {delivery > 0 && (
             <p className="mt-3 text-xs text-gray-500">
-              Add {formatPrice(FREE_DELIVERY_OVER - subtotal)} more to get free delivery.
+              <T vars={{ amount: formatPrice(FREE_DELIVERY_OVER - subtotal) }}>
+                Add {amount} more to get free delivery.
+              </T>
             </p>
           )}
 
@@ -146,7 +169,7 @@ export default function CartPage() {
             href="/checkout"
             className="mt-5 block rounded-lg bg-pink-600 py-3 text-center font-medium text-white hover:bg-pink-700"
           >
-            Proceed to Checkout
+            <T>Proceed to Checkout</T>
           </Link>
         </aside>
       </div>

@@ -4,50 +4,35 @@ import { Search, ShoppingBag, User, Heart } from "lucide-react";
 import UserMenu from "./UserMenu";
 import CartCount from "./CartCount";
 import CategoryLinks from "./CategoryLinks";
+import HeaderSearch from "./HeaderSearch";
+import ThemeToggle from "@/components/theme/ThemeToggle";
+import LanguageToggle from "@/components/i18n/LanguageToggle";
+import T from "@/components/i18n/T";
 
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b bg-white">
       {/* Top bar */}
       <div className="bg-pink-600 py-1.5 text-center text-xs text-white">
-        Free delivery on orders over ৳2000
+        <T>Free delivery on orders over ৳2000</T>
       </div>
 
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4">
         <Link href="/" className="text-xl font-bold text-pink-600">
           WomensHub
         </Link>
 
         {/* Search (desktop) */}
-        <form
-          action="/search"
-          method="get"
-          role="search"
-          className="hidden flex-1 md:block"
-        >
-          <div className="relative">
-            <input
-              type="search"
-              name="q"
-              maxLength={50}
-              placeholder="Search products, brands..."
-              className="w-full rounded-full border bg-gray-50 py-2 pl-4 pr-10 text-sm outline-none focus:border-pink-500"
-            />
-            <button
-              type="submit"
-              aria-label="Search"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-600"
-            >
-              <Search size={18} />
-            </button>
-          </div>
-        </form>
+        <HeaderSearch />
 
-        <nav className="ml-auto flex items-center gap-4">
+        <nav className="ml-auto flex items-center gap-3 sm:gap-4">
           {/* Search (mobile) */}
           <Link href="/search" aria-label="Search" className="md:hidden">
             <Search size={22} />
           </Link>
+
+          <LanguageToggle />
+          <ThemeToggle />
 
           <Link href="/wishlist" aria-label="Wishlist">
             <Heart size={22} />

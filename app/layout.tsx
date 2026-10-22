@@ -15,9 +15,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WomensHUb",
+  title: "WomensHub",
   description: "Your beauty, delivered.",
 };
+
+// Runs before the page is shown, so the saved theme and language apply without a flash
+const initScript = `
+(function () {
+  try {
+    var root = document.documentElement;
+    if (localStorage.getItem("theme") === "dark") root.classList.add("dark");
+    if (localStorage.getItem("lang") === "bn") {
+      root.dataset.lang = "bn";
+      root.lang = "bn";
+    }
+  } catch (e) {}
+})();
+`;
 
 export default function RootLayout({
   children,
@@ -25,7 +39,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: initScript }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
       >

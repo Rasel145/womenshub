@@ -4,6 +4,7 @@ import { formatPrice } from "@/lib/utils";
 import AddToCartButton from "./AddToCartButton";
 import WishlistButton from "./WishlistButton";
 import StarRating from "./StarRating";
+import T from "@/components/i18n/T";
 
 export default function ProductCard({ product }: { product: Product }) {
   const discount = product.oldPrice
@@ -49,7 +50,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
       ) : (
         <div className="mt-1 h-[14px] text-xs leading-[14px] text-gray-400">
-          No reviews yet
+          <T>No reviews yet</T>
         </div>
       )}
 

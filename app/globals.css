@@ -1,8 +1,64 @@
 @import "tailwindcss";
 
+/* Makes the "dark:" prefix work with the .dark class that the theme button sets */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  color-scheme: light;
+}
+
+/*
+  Dark mode: instead of editing every component, the colour palette itself is
+  swapped. White becomes a dark card colour, light greys become dark greys,
+  and dark text greys become light greys.
+*/
+.dark {
+  --background: #0f0f13;
+  --foreground: #ededf2;
+  color-scheme: dark;
+
+  --color-white: #1a1a21;
+  --color-gray-50: #202028;
+  --color-gray-100: #272730;
+  --color-gray-200: #353540;
+  --color-gray-300: #484855;
+  --color-gray-400: #8d8d9c;
+  --color-gray-500: #a3a3b2;
+  --color-gray-600: #babac6;
+  --color-gray-700: #d0d0da;
+  --color-gray-800: #e4e4ec;
+  --color-gray-900: #f3f3f8;
+
+  --color-pink-50: #2b1824;
+  --color-pink-100: #3b1f30;
+  --color-pink-200: #5c2c47;
+  --color-pink-300: #d4789f;
+  --color-pink-700: #ec4899;
+
+  --color-red-50: #3a1519;
+  --color-red-100: #4b1a20;
+  --color-red-200: #6e262e;
+  --color-red-300: #9a3a44;
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+
+  --color-green-50: #12301f;
+  --color-green-100: #17402a;
+  --color-green-600: #4ade80;
+  --color-green-700: #86efac;
+
+  --color-yellow-50: #2e2a0a;
+  --color-yellow-100: #3a330c;
+  --color-yellow-700: #fde047;
+  --color-yellow-800: #fde68a;
+
+  --color-blue-100: #12294d;
+  --color-blue-700: #93c5fd;
+  --color-indigo-100: #25214f;
+  --color-indigo-700: #a5b4fc;
+  --color-amber-600: #fbbf24;
 }
 
 @theme inline {
@@ -12,10 +68,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  *,
+  ::after,
+  ::before {
+    border-color: var(--color-gray-200, currentColor);
   }
 }
 
@@ -24,17 +81,22 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
-@layer base {
-  *,
-  ::after,
-  ::before {
-    border-color: var(--color-gray-200, currentColor);
-  }
+
+/* "text-white" is used on pink buttons, so it must stay white in dark mode */
+.dark .text-white {
+  color: #ffffff;
 }
-@layer base {
-  *,
-  ::after,
-  ::before {
-    border-color: var(--color-gray-200, currentColor);
-  }
+
+/*
+  Language switch: every <T> puts the English and the Bangla text in the page,
+  and only one of them is shown.
+*/
+[data-l="bn"] {
+  display: none;
+}
+html[data-lang="bn"] [data-l="en"] {
+  display: none;
+}
+html[data-lang="bn"] [data-l="bn"] {
+  display: inline;
 }

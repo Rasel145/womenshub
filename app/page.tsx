@@ -1,12 +1,21 @@
 import { Suspense } from "react";
 import ProductCard from "@/components/product/ProductCard";
 import { getLatestProducts } from "@/lib/products";
+import T from "@/components/i18n/T";
 
 export default function Home() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6">
-      <h2 className="mb-4 text-xl font-bold">Latest Products</h2>
-      <Suspense fallback={<p className="text-gray-500">Loading products...</p>}>
+      <h2 className="mb-4 text-xl font-bold">
+        <T>Latest Products</T>
+      </h2>
+      <Suspense
+        fallback={
+          <p className="text-gray-500">
+            <T>Loading products...</T>
+          </p>
+        }
+      >
         <LatestProducts />
       </Suspense>
     </main>
