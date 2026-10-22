@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import ProductListing from "@/components/product/ProductListing";
 import { searchProducts } from "@/lib/products";
+import { getCategories } from "@/lib/categories";
 
 type SearchParams = Promise<{ q?: string }>;
 
@@ -21,6 +22,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
   const query = q.trim().slice(0, 50);
   const tooShort = query.length > 0 && query.length < 2;
   const products = query.length >= 2 ? await searchProducts(query) : [];
+  const categories = products.length === 0 && query.length >= 2 ? await getCategories() : [];
 
   return (
     <div>
@@ -47,9 +49,7 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
         <p className="text-gray-500">Type a product name, brand or category to search.</p>
       )}
 
-      {tooShort && (
-        <p className="text-gray-500">Please type at least 2 characters.</p>
-      )}
+      {tooShort && <p className="text-gray-500">Please type at least 2 characters.</p>}
 
       {query.length >= 2 && (
         <>
@@ -62,19 +62,13 @@ async function SearchContent({ searchParams }: { searchParams: SearchParams }) {
             <div className="rounded-xl border bg-white p-8 text-center text-sm text-gray-500">
               <p className="mb-3">No products found. Try a different word, or browse:</p>
               <div className="flex flex-wrap justify-center gap-2">
-                {[
-                  ["skincare", "Skincare"],
-                  ["makeup", "Makeup"],
-                  ["haircare", "Haircare"],
-                  ["fragrance", "Fragrance"],
-                  ["bath-body", "Bath & Body"],
-                ].map(([slug, label]) => (
+                {categories.map((c) => (
                   <Link
-                    key={slug}
-                    href={`/category/${slug}`}
+                    key={c.id}
+                    href={`/category/${c.slug}`}
                     className="rounded-full bg-gray-100 px-3 py-1 hover:bg-pink-100 hover:text-pink-700"
                   >
-                    {label}
+                    {c.name}
                   </Link>
                 ))}
               </div>

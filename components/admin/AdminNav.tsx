@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   ShoppingBag,
   Package,
+  Tags,
   Users,
   ArrowLeft,
 } from "lucide-react";
@@ -15,6 +16,7 @@ const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag, exact: false },
   { href: "/admin/products", label: "Products", icon: Package, exact: false },
+  { href: "/admin/categories", label: "Categories", icon: Tags, exact: false },
   { href: "/admin/customers", label: "Customers", icon: Users, exact: false },
 ];
 

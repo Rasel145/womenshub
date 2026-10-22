@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Search, ShoppingBag, User, Heart } from "lucide-react";
 import UserMenu from "./UserMenu";
 import CartCount from "./CartCount";
+import CategoryLinks from "./CategoryLinks";
 
 export default function Header() {
   return (
@@ -69,15 +70,11 @@ export default function Header() {
         </nav>
       </div>
 
-      {/* Category links */}
+      {/* Category links (from the database) */}
       <div className="border-t">
-        <ul className="mx-auto flex max-w-6xl gap-5 overflow-x-auto whitespace-nowrap px-4 py-2 text-sm">
-          <li><Link href="/category/skincare">Skincare</Link></li>
-          <li><Link href="/category/makeup">Makeup</Link></li>
-          <li><Link href="/category/haircare">Haircare</Link></li>
-          <li><Link href="/category/fragrance">Fragrance</Link></li>
-          <li><Link href="/category/bath-body">Bath &amp; Body</Link></li>
-        </ul>
+        <Suspense fallback={<div className="mx-auto h-9 max-w-6xl px-4" />}>
+          <CategoryLinks />
+        </Suspense>
       </div>
     </header>
   );

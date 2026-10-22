@@ -1,6 +1,8 @@
 import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import ProductListing from "@/components/product/ProductListing";
 import { getProductsByCategory } from "@/lib/products";
+import { getCategoryBySlug } from "@/lib/categories";
 
 export default function CategoryPage({
   params,
@@ -22,12 +24,15 @@ async function CategoryContent({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  const category = await getCategoryBySlug(slug);
+  if (!category) notFound();
+
   const products = await getProductsByCategory(slug);
-  const title = slug.replace(/-/g, " ");
 
   return (
     <>
-      <h1 className="mb-6 text-2xl font-bold capitalize">{title}</h1>
+      <h1 className="mb-6 text-2xl font-bold">{category.name}</h1>
       <ProductListing products={products} />
     </>
   );
