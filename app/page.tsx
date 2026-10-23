@@ -1,35 +1,53 @@
 import { Suspense } from "react";
-import ProductCard from "@/components/product/ProductCard";
-import { getLatestProducts } from "@/lib/products";
-import T from "@/components/i18n/T";
+import Hero from "@/components/home/Hero";
+import TrustStrip from "@/components/home/TrustStrip";
+import CategoryTiles from "@/components/home/CategoryTiles";
+import ProductSection from "@/components/home/ProductSection";
+import {
+  getLatestProducts,
+  getBestSellerProducts,
+  getTopRatedProducts,
+} from "@/lib/products";
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-6">
-      <h2 className="mb-4 text-xl font-bold">
-        <T>Latest Products</T>
-      </h2>
-      <Suspense
-        fallback={
-          <p className="text-gray-500">
-            <T>Loading products...</T>
-          </p>
-        }
-      >
-        <LatestProducts />
-      </Suspense>
+    <main>
+      <Hero />
+
+      <div className="mx-auto w-full max-w-6xl space-y-12 px-4 py-8">
+        <TrustStrip />
+
+        <Suspense fallback={null}>
+          <CategoryTiles />
+        </Suspense>
+
+        <Suspense fallback={<div className="h-64" />}>
+          <NewArrivals />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <Popular />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <TopRated />
+        </Suspense>
+      </div>
     </main>
   );
 }
 
-async function LatestProducts() {
+async function NewArrivals() {
   const products = await getLatestProducts(8);
+  return <ProductSection title="New Arrivals" href="/products" products={products} />;
+}
 
-  return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
-  );
+async function Popular() {
+  const products = await getBestSellerProducts(4);
+  return <ProductSection title="Popular Right Now" products={products} />;
+}
+
+async function TopRated() {
+  const products = await getTopRatedProducts(4);
+  return <ProductSection title="Top Rated" products={products} />;
 }

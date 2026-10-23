@@ -159,9 +159,9 @@ export default function CartPage() {
 
           {delivery > 0 && (
             <p className="mt-3 text-xs text-gray-500">
-              <T vars={{ amount: formatPrice(FREE_DELIVERY_OVER - subtotal) }}>
-                Add {amount} more to get free delivery.
-              </T>
+            <T vars={{ amount: formatPrice(FREE_DELIVERY_OVER - subtotal) }}>
+            {"Add {amount} more to get free delivery."}
+            </T>
             </p>
           )}
 

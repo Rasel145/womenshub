@@ -1,10 +1,28 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import T from "@/components/i18n/T";
+import { getCategories } from "@/lib/categories";
+
+async function FooterCategories() {
+  const categories = await getCategories();
+
+  return (
+    <ul className="space-y-1 text-gray-500">
+      {categories.map((c) => (
+        <li key={c.id}>
+          <Link href={`/category/${c.slug}`}>
+            <T>{c.name}</T>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export default function Footer() {
   return (
     <footer className="mt-12 border-t bg-gray-50">
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 text-sm sm:grid-cols-3">
+      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <h3 className="mb-2 text-lg font-bold text-pink-600">WomensHub</h3>
           <p className="text-gray-500">
@@ -23,16 +41,20 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/category/skincare">
-                <T>Skincare</T>
-              </Link>
-            </li>
-            <li>
-              <Link href="/category/makeup">
-                <T>Makeup</T>
+              <Link href="/search">
+                <T>Search</T>
               </Link>
             </li>
           </ul>
+        </div>
+
+        <div>
+          <h4 className="mb-2 font-semibold">
+            <T>Categories</T>
+          </h4>
+          <Suspense fallback={null}>
+            <FooterCategories />
+          </Suspense>
         </div>
 
         <div>

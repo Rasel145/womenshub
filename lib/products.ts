@@ -91,3 +91,43 @@ export async function searchProducts(query: string, limit = 60): Promise<Product
 
   return rows.map(toProduct);
 }
+
+// Products with the best average rating (only products that have reviews)
+export async function getTopRatedProducts(limit = 4): Promise<Product[]> {
+  await connection();
+
+  const rows = await prisma.product.findMany({
+    where: { isActive: true, reviewCount: { gt: 0 } },
+    orderBy: [{ rating: "desc" }, { reviewCount: "desc" }],
+    take: limit,
+    include,
+  });
+
+  return rows.map(toProduct);
+}
+
+// Products that sold the most pieces (cancelled orders are not counted)
+export async function getBestSellerProducts(limit = 4): Promise<Product[]> {
+  await connection();
+
+  const top = await prisma.orderItem.groupBy({
+    by: ["productId"],
+    where: { order: { status: { not: "CANCELLED" } } },
+    _sum: { quantity: true },
+    orderBy: { _sum: { quantity: "desc" } },
+    take: limit * 2, // some of them may be hidden, so take extra
+  });
+  if (top.length === 0) return [];
+
+  const rows = await prisma.product.findMany({
+    where: { id: { in: top.map((t) => t.productId) }, isActive: true },
+    include,
+  });
+  const byId = new Map(rows.map((r) => [r.id, r]));
+
+  return top
+    .map((t) => byId.get(t.productId))
+    .filter((r): r is NonNullable<typeof r> => Boolean(r))
+    .slice(0, limit)
+    .map(toProduct);
+}
