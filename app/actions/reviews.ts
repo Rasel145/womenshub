@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { refreshProductRating } from "@/lib/reviews";
+import { checkLimits, tooManyMessage } from "@/lib/rate-limit"; // NEW
 
 type Result = { ok: true } | { ok: false; error: string };
 
@@ -28,6 +29,13 @@ export async function submitReview(input: {
     return { ok: false, error: "The title can be up to 80 characters." };
   if (comment.length < 10 || comment.length > 1000)
     return { ok: false, error: "Your review must be 10 to 1000 characters." };
+
+  // NEW: at most 10 review saves per hour for one customer
+  const limited = await checkLimits([
+    { key: `review:user:${user.id}`, limit: 10, windowSeconds: 60 * 60 },
+  ]);
+  if (!limited.allowed)
+    return { ok: false, error: tooManyMessage(limited.retryAfterSeconds) };
 
   try {
     // Checked on the server, so nobody can skip it from the browser
@@ -70,6 +78,13 @@ export async function deleteMyReview(productId: string): Promise<Result> {
 
   if (typeof productId !== "string" || productId.length === 0 || productId.length > 40)
     return { ok: false, error: "Product not found." };
+
+  // NEW
+  const limited = await checkLimits([
+    { key: `review-delete:user:${user.id}`, limit: 20, windowSeconds: 60 * 60 },
+  ]);
+  if (!limited.allowed)
+    return { ok: false, error: tooManyMessage(limited.retryAfterSeconds) };
 
   try {
     await prisma.$transaction(async (tx) => {

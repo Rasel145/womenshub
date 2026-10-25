@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getDeliveryCharge } from "@/lib/delivery";
+import { checkLimits, getClientIp, hashKey, tooManyMessage } from "@/lib/rate-limit"; // NEW
 
 type OrderInput = {
   customer: {
@@ -58,7 +59,17 @@ export async function placeOrder(input: OrderInput): Promise<OrderResult> {
   try {
     validate(input);
 
-    // NEW: logged-in customers get the order attached to their account, guests get null
+    // NEW: limits against fake-order floods
+    const ipKey = hashKey(await getClientIp());
+    const phoneKey = hashKey(input.customer.phone.trim());
+    const limited = await checkLimits([
+      { key: `order:ip:${ipKey}`, limit: 40, windowSeconds: 60 * 60 },
+      { key: `order:phone:${phoneKey}`, limit: 5, windowSeconds: 60 * 60 },
+    ]);
+    if (!limited.allowed)
+      return { ok: false, error: tooManyMessage(limited.retryAfterSeconds) };
+
+    // Logged-in customers get the order attached to their account, guests get null
     const user = await getCurrentUser();
 
     const order = await prisma.$transaction(async (tx) => {
@@ -66,7 +77,7 @@ export async function placeOrder(input: OrderInput): Promise<OrderResult> {
       const ids = [...new Set(input.items.map((i) => i.productId))];
       const dbProducts = await tx.product.findMany({
         where: { id: { in: ids }, isActive: true },
-        });
+      });
       const byId = new Map(dbProducts.map((p) => [p.id, p]));
 
       let subtotal = 0;
@@ -102,7 +113,7 @@ export async function placeOrder(input: OrderInput): Promise<OrderResult> {
       return tx.order.create({
         data: {
           orderNumber: `WH-${randomBytes(4).toString("hex").toUpperCase()}`,
-          userId: user?.id ?? null, // NEW
+          userId: user?.id ?? null,
           name: input.customer.name.trim(),
           phone: input.customer.phone.trim(),
           address: input.customer.address.trim(),

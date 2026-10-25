@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { checkLimits } from "@/lib/rate-limit"; // NEW
 
 const MAX_ITEMS = 200;
 
@@ -31,6 +32,12 @@ export async function setWishlisted(
 
   if (typeof productId !== "string" || productId.length === 0 || productId.length > 40)
     return { ok: false, error: "failed" };
+
+  // NEW: at most 60 heart clicks per minute for one customer
+  const limited = await checkLimits([
+    { key: `wishlist:user:${user.id}`, limit: 60, windowSeconds: 60 },
+  ]);
+  if (!limited.allowed) return { ok: false, error: "failed" };
 
   try {
     if (wanted) {

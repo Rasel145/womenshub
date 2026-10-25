@@ -4,6 +4,13 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { createSession, destroySession } from "@/lib/auth";
+import {
+  checkLimits,
+  getClientIp,
+  hashKey,
+  resetLimit,
+  tooManyMessage,
+} from "@/lib/rate-limit"; // NEW
 
 type ActionResult = { ok: false; error: string };
 
@@ -23,6 +30,14 @@ export async function registerAction(input: {
   const phone = input.phone?.trim() ?? "";
   const email = input.email?.trim().toLowerCase() || undefined;
   const password = input.password ?? "";
+
+  // NEW: at most 10 sign-ups per hour from one IP
+  const ipKey = hashKey(await getClientIp());
+  const limited = await checkLimits([
+    { key: `register:ip:${ipKey}`, limit: 10, windowSeconds: 60 * 60 },
+  ]);
+  if (!limited.allowed)
+    return { ok: false, error: tooManyMessage(limited.retryAfterSeconds) };
 
   if (name.length < 3 || name.length > 80)
     return { ok: false, error: "Enter your full name." };
@@ -82,6 +97,19 @@ export async function loginAction(input: {
 
   if (!identifier || !password || password.length > 128) return invalid;
 
+  // NEW: three limits, checked BEFORE the slow password check
+  const ipKey = hashKey(await getClientIp());
+  const idKey = hashKey(identifier.toLowerCase());
+  const pairKey = `login:ip-id:${ipKey}:${idKey}`;
+
+  const limited = await checkLimits([
+    { key: `login:ip:${ipKey}`, limit: 30, windowSeconds: 15 * 60 },
+    { key: pairKey, limit: 5, windowSeconds: 15 * 60 },
+    { key: `login:id:${idKey}`, limit: 30, windowSeconds: 60 * 60 },
+  ]);
+  if (!limited.allowed)
+    return { ok: false, error: tooManyMessage(limited.retryAfterSeconds) };
+
   const user = identifier.includes("@")
     ? await prisma.user.findUnique({ where: { email: identifier.toLowerCase() } })
     : await prisma.user.findUnique({ where: { phone: identifier } });
@@ -92,8 +120,11 @@ export async function loginAction(input: {
   );
   if (!user || !valid) return invalid;
 
+  // NEW: a correct password clears this person's failed-attempt counter
+  await resetLimit(pairKey);
+
   await createSession(user.id);
-  redirect("/account");
+  redirect(user.role === "ADMIN" ? "/admin" : "/account");
 }
 
 export async function logoutAction(): Promise<void> {

@@ -4,6 +4,7 @@ import { createHash, randomInt, timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { sendPasswordResetCode } from "@/lib/notify";
+import { checkLimits, getClientIp, hashKey, tooManyMessage } from "@/lib/rate-limit"; // NEW
 
 type Result = { ok: true } | { ok: false; error: string };
 
@@ -33,6 +34,15 @@ export async function requestPasswordReset(rawIdentifier: string): Promise<Resul
   const identifier = rawIdentifier?.trim() ?? "";
   if (!validIdentifier(identifier))
     return { ok: false, error: "Enter a valid mobile number or email." };
+
+  // NEW: at most 10 code requests per hour from one IP.
+  // The answer does not depend on whether the account exists.
+  const ipKey = hashKey(await getClientIp());
+  const limited = await checkLimits([
+    { key: `reset-request:ip:${ipKey}`, limit: 10, windowSeconds: 60 * 60 },
+  ]);
+  if (!limited.allowed)
+    return { ok: false, error: tooManyMessage(limited.retryAfterSeconds) };
 
   try {
     const user = await findUser(identifier);
@@ -105,6 +115,16 @@ export async function confirmPasswordReset(input: {
   if (!/^\d{6}$/.test(code)) return { ok: false, error: "Enter the 6-digit code." };
   if (password.length < 8 || password.length > 128)
     return { ok: false, error: "Password must be 8 to 128 characters." };
+
+  // NEW: slows down anyone trying to guess the 6-digit code
+  const ipKey = hashKey(await getClientIp());
+  const idKey = hashKey(identifier.toLowerCase());
+  const limited = await checkLimits([
+    { key: `reset-confirm:ip:${ipKey}`, limit: 20, windowSeconds: 15 * 60 },
+    { key: `reset-confirm:id:${idKey}`, limit: 10, windowSeconds: 15 * 60 },
+  ]);
+  if (!limited.allowed)
+    return { ok: false, error: tooManyMessage(limited.retryAfterSeconds) };
 
   try {
     const user = await findUser(identifier);

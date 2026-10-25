@@ -166,3 +166,8 @@ model Review {
   @@unique([userId, productId])
   @@index([productId, isVisible, createdAt])
 }
+model RateLimit {
+  key     String @id
+  count   Int
+  resetAt BigInt // when this counting window ends, in milliseconds
+}
