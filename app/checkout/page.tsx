@@ -8,6 +8,7 @@ import { useCart } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { DeliveryArea, getDeliveryCharge, DELIVERY_CHARGE } from "@/lib/delivery";
 import { placeOrder } from "@/app/actions/orders";
+import Turnstile from "@/components/security/Turnstile"; // NEW
 
 type PaymentMethod = "cod" | "bkash" | "nagad";
 
@@ -45,6 +46,8 @@ export default function CheckoutPage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [area, setArea] = useState<DeliveryArea>("dhaka");
   const [payment, setPayment] = useState<PaymentMethod>("cod");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null); // NEW
+  const [captchaReset, setCaptchaReset] = useState(0); // NEW
   const [form, setForm] = useState<FormState>({
     name: "",
     phone: "",
@@ -99,6 +102,12 @@ export default function CheckoutPage() {
     e.preventDefault();
     if (submitting || !validate()) return;
 
+    // NEW: the security check must be passed first
+    if (!captchaToken) {
+      setServerError("Please complete the security check.");
+      return;
+    }
+
     setSubmitting(true);
     setServerError(null);
 
@@ -117,11 +126,15 @@ export default function CheckoutPage() {
         variant: i.variant,
         quantity: i.quantity,
       })),
+      captchaToken, // NEW
     });
 
     if (!result.ok) {
       setServerError(result.error);
       setSubmitting(false);
+      // NEW: a security token works only once, so ask for a fresh one
+      setCaptchaToken(null);
+      setCaptchaReset((n) => n + 1);
       return;
     }
 
@@ -308,6 +321,11 @@ export default function CheckoutPage() {
               <dd className="text-pink-600">{formatPrice(total)}</dd>
             </div>
           </dl>
+
+          {/* NEW: security check */}
+          <div className="mt-5">
+            <Turnstile onToken={setCaptchaToken} resetSignal={captchaReset} />
+          </div>
 
           {serverError && (
             <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">

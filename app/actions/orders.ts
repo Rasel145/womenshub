@@ -4,7 +4,11 @@ import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getDeliveryCharge } from "@/lib/delivery";
-import { checkLimits, getClientIp, hashKey, tooManyMessage } from "@/lib/rate-limit"; // NEW
+import { checkLimits, getClientIp, hashKey, tooManyMessage } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile"; // NEW
+
+// NEW: one phone number can have at most this many orders waiting for confirmation
+const MAX_PENDING_PER_PHONE = 2;
 
 type OrderInput = {
   customer: {
@@ -17,6 +21,7 @@ type OrderInput = {
   area: "dhaka" | "outside";
   payment: "cod" | "bkash" | "nagad";
   items: { productId: string; variant?: string; quantity: number }[];
+  captchaToken: string; // NEW
 };
 
 type OrderResult = { ok: true; orderNumber: string } | { ok: false; error: string };
@@ -59,7 +64,7 @@ export async function placeOrder(input: OrderInput): Promise<OrderResult> {
   try {
     validate(input);
 
-    // NEW: limits against fake-order floods
+    // Limits against fake-order floods
     const ipKey = hashKey(await getClientIp());
     const phoneKey = hashKey(input.customer.phone.trim());
     const limited = await checkLimits([
@@ -68,6 +73,20 @@ export async function placeOrder(input: OrderInput): Promise<OrderResult> {
     ]);
     if (!limited.allowed)
       return { ok: false, error: tooManyMessage(limited.retryAfterSeconds) };
+
+    // NEW: the visitor must have passed the "I am not a robot" check
+    const captcha = await verifyTurnstile(input.captchaToken);
+    if (!captcha.ok) return { ok: false, error: captcha.error };
+
+    // NEW: too many orders from one phone number are still waiting for confirmation
+    const pending = await prisma.order.count({
+      where: { phone: input.customer.phone.trim(), status: "PENDING" },
+    });
+    if (pending >= MAX_PENDING_PER_PHONE)
+      return {
+        ok: false,
+        error: `This mobile number already has ${pending} orders waiting for confirmation. Please wait for our call, or contact us to change them.`,
+      };
 
     // Logged-in customers get the order attached to their account, guests get null
     const user = await getCurrentUser();
