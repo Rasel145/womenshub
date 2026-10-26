@@ -5,6 +5,12 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { formatPrice } from "@/lib/utils";
 import { STATUS_LABEL, STATUS_STYLE, type OrderStatus } from "@/lib/order-status";
+import {
+  countStalePending,
+  WARN_AFTER_HOURS,
+  CANCEL_AFTER_HOURS,
+} from "@/lib/order-expiry"; // NEW
+import ExpireOrdersButton from "@/components/admin/ExpireOrdersButton"; // NEW
 
 export default function AdminDashboardPage() {
   return (
@@ -17,18 +23,28 @@ export default function AdminDashboardPage() {
 async function Dashboard() {
   await requireAdmin();
 
-  const [totalOrders, pendingOrders, delivered, lowStock, customers, recent] =
-    await Promise.all([
-      prisma.order.count(),
-      prisma.order.count({ where: { status: "PENDING" } }),
-      prisma.order.aggregate({
-        _sum: { total: true },
-        where: { status: "DELIVERED" },
-      }),
-      prisma.product.count({ where: { stock: { lte: 5 } } }),
-      prisma.user.count({ where: { role: "CUSTOMER" } }),
-      prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
-    ]);
+  const [
+    totalOrders,
+    pendingOrders,
+    delivered,
+    lowStock,
+    customers,
+    recent,
+    waitingLong, // NEW
+    readyToCancel, // NEW
+  ] = await Promise.all([
+    prisma.order.count(),
+    prisma.order.count({ where: { status: "PENDING" } }),
+    prisma.order.aggregate({
+      _sum: { total: true },
+      where: { status: "DELIVERED" },
+    }),
+    prisma.product.count({ where: { stock: { lte: 5 } } }),
+    prisma.user.count({ where: { role: "CUSTOMER" } }),
+    prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
+    countStalePending(WARN_AFTER_HOURS),
+    countStalePending(CANCEL_AFTER_HOURS),
+  ]);
 
   const stats = [
     { label: "Total orders", value: totalOrders.toString() },
@@ -41,6 +57,31 @@ async function Dashboard() {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-bold">Dashboard</h1>
+
+      {/* NEW: orders that nobody has confirmed for a long time */}
+      {waitingLong > 0 && (
+        <div className="mb-6 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800">
+          <p className="font-medium">
+            {waitingLong} pending {waitingLong === 1 ? "order has" : "orders have"} been
+            waiting more than {WARN_AFTER_HOURS} hours.
+          </p>
+          <p className="mt-1">
+            Confirm or cancel {waitingLong === 1 ? "it" : "them"} so customers are not kept
+            waiting. Orders still pending after {CANCEL_AFTER_HOURS} hours are cancelled
+            automatically.
+          </p>
+          <Link
+            href="/admin/orders?status=PENDING"
+            className="mt-2 inline-block font-medium underline"
+          >
+            View pending orders
+          </Link>
+
+          {readyToCancel > 0 && (
+            <ExpireOrdersButton count={readyToCancel} hours={CANCEL_AFTER_HOURS} />
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         {stats.map((s) => (
