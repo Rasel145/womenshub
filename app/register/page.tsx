@@ -166,7 +166,16 @@ export default function RegisterPage() {
                 }}
                 className="mt-0.5 accent-pink-600"
               />
-              I agree to the Terms &amp; Conditions and Privacy Policy
+                            <span>
+                I agree to the{" "}
+                <Link href="/terms" target="_blank" className="text-pink-600 underline">
+                  Terms &amp; Conditions
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" target="_blank" className="text-pink-600 underline">
+                  Privacy Policy
+                </Link>
+              </span>
             </label>
             {errors.terms && <p className="mt-1 text-xs text-red-600">{errors.terms}</p>}
           </div>

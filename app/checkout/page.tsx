@@ -333,6 +333,17 @@ export default function CheckoutPage() {
             </p>
           )}
 
+             <p className="mt-4 text-xs text-gray-500">
+            By placing this order you agree to our{" "}
+            <Link href="/terms" target="_blank" className="text-pink-600 underline">
+              Terms &amp; Conditions
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" target="_blank" className="text-pink-600 underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
           <button
             type="submit"
             disabled={submitting}

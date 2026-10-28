@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import T from "@/components/i18n/T";
 import { getCategories } from "@/lib/categories";
+import { business as b } from "@/lib/business";
 
 async function FooterCategories() {
   const categories = await getCategories();
@@ -77,13 +78,41 @@ export default function Footer() {
                 <T>Cart</T>
               </Link>
             </li>
+            <li>
+              <Link href="/terms">
+                <T>Terms & Conditions</T>
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy">
+                <T>Privacy Policy</T>
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
 
-      <p className="border-t py-3 text-center text-xs text-gray-400">
-        © 2026 WomensHub. <T>All rights reserved.</T>
-      </p>
+      {/* Business identity: the digital commerce guidelines ask for this to be shown */}
+      <div className="border-t px-4 py-3 text-center text-xs text-gray-400">
+        <p>
+          © 2026 {b.brand}. <T>All rights reserved.</T>
+        </p>
+        <p className="mt-1">
+          {b.legalName} · <T>Trade License</T>: {b.tradeLicense} · <T>TIN</T>: {b.tin}
+          {b.bin ? (
+            <>
+              {" "}
+              · <T>BIN</T>: {b.bin}
+            </>
+          ) : null}
+          {b.ubid ? (
+            <>
+              {" "}
+              · <T>UBID</T>: {b.ubid}
+            </>
+          ) : null}
+        </p>
+      </div>
     </footer>
   );
 }

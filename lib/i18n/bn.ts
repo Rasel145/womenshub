@@ -76,4 +76,15 @@ export const bn: Record<string, string> = {
     "আপনি যে পেজটি খুঁজছেন সেটি নেই বা সরানো হয়েছে।",
   "Back to Home": "হোমে ফিরে যান",
   "Browse Products": "পণ্য দেখুন",
+
+
+   // Legal links and footer
+  "Terms & Conditions": "শর্তাবলি",
+  "Privacy Policy": "গোপনীয়তা নীতি",
+  "Trade License": "ট্রেড লাইসেন্স",
+  "TIN": "টিআইএন",
+  "BIN": "বিআইএন",
+  "UBID": "ইউবিআইডি",
 };
+
+ 

@@ -100,3 +100,14 @@ html[data-lang="bn"] [data-l="en"] {
 html[data-lang="bn"] [data-l="bn"] {
   display: inline;
 }
+
+/* Legal pages: show only the English or only the Bangla version of the page */
+[data-lb="bn"] {
+  display: none;
+}
+html[data-lang="bn"] [data-lb="en"] {
+  display: none;
+}
+html[data-lang="bn"] [data-lb="bn"] {
+  display: block;
+}
