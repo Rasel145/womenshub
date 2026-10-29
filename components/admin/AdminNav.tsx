@@ -12,6 +12,7 @@ import {
   MessageSquare,
   ArrowLeft,
 } from "lucide-react";
+import { useAdminCounts } from "./AdminCounts";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -24,12 +25,15 @@ const links = [
 
 export default function AdminNav() {
   const pathname = usePathname();
+  const { pending, unseen } = useAdminCounts();
 
   return (
-    <aside className="md:w-52">
+    <aside className="admin-nav md:w-52">
       <nav className="flex gap-2 overflow-x-auto md:flex-col">
         {links.map(({ href, label, icon: Icon, exact }) => {
           const active = exact ? pathname === href : pathname.startsWith(href);
+          const badge = href === "/admin/orders" ? pending : 0;
+
           return (
             <Link
               key={href}
@@ -43,6 +47,18 @@ export default function AdminNav() {
             >
               <Icon size={18} />
               {label}
+              {badge > 0 && (
+                <span
+                  className={clsx(
+                    "ml-auto rounded-full px-2 py-0.5 text-xs font-semibold",
+                    active ? "bg-white text-pink-600" : "bg-pink-600 text-white",
+                    unseen > 0 && "animate-pulse"
+                  )}
+                  style={active ? { backgroundColor: "#ffffff" } : undefined}
+                >
+                  {badge}
+                </span>
+              )}
             </Link>
           );
         })}

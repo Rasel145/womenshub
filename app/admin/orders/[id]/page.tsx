@@ -2,11 +2,18 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import clsx from "clsx";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Printer } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { formatPrice } from "@/lib/utils";
 import OrderStatusActions from "@/components/admin/OrderStatusActions";
+import {
+  MarkOrderSeen,
+  OrderEditPanel,
+  ShippingPanel,
+  AddEventForm,
+  AdminNotePanel,
+} from "@/components/admin/OrderPanels";
 import {
   STATUS_LABEL,
   STATUS_STYLE,
@@ -33,14 +40,21 @@ async function OrderContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const order = await prisma.order.findUnique({
     where: { id },
-    include: { items: true, user: { select: { name: true, phone: true } } },
+    include: {
+      items: true,
+      user: { select: { name: true, phone: true } },
+      events: { orderBy: { createdAt: "asc" } },
+    },
   });
   if (!order) notFound();
 
   const status = order.status as OrderStatus;
+  const editable = status === "PENDING" || status === "CONFIRMED";
 
   return (
     <div>
+      <MarkOrderSeen orderId={order.id} />
+
       <Link
         href="/admin/orders"
         className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-pink-600"
@@ -60,11 +74,30 @@ async function OrderContent({ params }: { params: Promise<{ id: string }> }) {
           {STATUS_LABEL[status]}
         </span>
       </div>
-      <p className="mb-6 text-sm text-gray-500">
+      <p className="mb-4 text-sm text-gray-500">
         Placed on {formatDateTime(order.createdAt)}
       </p>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+      <div className="mb-6 flex flex-wrap gap-2">
+        <Link
+          href={`/admin/orders/${order.id}/print`}
+          target="_blank"
+          className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+        >
+          <Printer size={15} />
+          Invoice
+        </Link>
+        <Link
+          href={`/admin/orders/${order.id}/print?type=packing`}
+          target="_blank"
+          className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+        >
+          <Printer size={15} />
+          Packing slip
+        </Link>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
           {/* Items */}
           <section className="rounded-xl border bg-white p-5">
@@ -111,41 +144,73 @@ async function OrderContent({ params }: { params: Promise<{ id: string }> }) {
             <h2 className="mb-4 font-semibold">Update status</h2>
             <OrderStatusActions orderId={order.id} current={status} />
           </section>
+
+          {/* Timeline */}
+          <section className="rounded-xl border bg-white p-5">
+            <h2 className="mb-4 font-semibold">Timeline</h2>
+
+            <ol className="space-y-4 border-l pl-5 text-sm">
+              <li className="relative">
+                <span className="absolute -left-[26px] top-1.5 h-2.5 w-2.5 rounded-full bg-pink-600" />
+                <p className="font-medium">Order placed</p>
+                <p className="text-xs text-gray-400">{formatDateTime(order.createdAt)}</p>
+              </li>
+
+              {order.events.map((e) => (
+                <li key={e.id} className="relative">
+                  <span className="absolute -left-[26px] top-1.5 h-2.5 w-2.5 rounded-full bg-pink-600" />
+                  <p className="font-medium">{e.message}</p>
+                  {e.location && <p className="text-xs text-gray-500">{e.location}</p>}
+                  <p className="text-xs text-gray-400">
+                    {formatDateTime(e.createdAt)}
+                    {!e.visibleToCustomer && " · internal only"}
+                  </p>
+                </li>
+              ))}
+            </ol>
+
+            <AddEventForm orderId={order.id} />
+          </section>
         </div>
 
-        {/* Customer */}
-        <aside className="h-fit space-y-5 rounded-xl border bg-white p-5 text-sm">
-          <div>
-            <h2 className="mb-2 font-semibold">Customer</h2>
-            <p>{order.name}</p>
-            <p className="text-gray-500">{order.phone}</p>
-            <p className="mt-1 text-xs text-gray-400">
-              {order.user ? "Registered customer" : "Guest checkout"}
-            </p>
-          </div>
+        <aside className="h-fit space-y-6">
+          <div className="space-y-5 rounded-xl border bg-white p-5 text-sm">
+            <OrderEditPanel
+              orderId={order.id}
+              editable={editable}
+              initial={{
+                name: order.name,
+                phone: order.phone,
+                address: order.address,
+                city: order.city,
+                note: order.note ?? "",
+              }}
+              accountLabel={order.user ? "Registered customer" : "Guest checkout"}
+              areaLabel={order.area === "DHAKA" ? "Inside Dhaka" : "Outside Dhaka"}
+            />
 
-          <div>
-            <h2 className="mb-2 font-semibold">Delivery address</h2>
-            <p className="whitespace-pre-line text-gray-600">{order.address}</p>
-            <p className="text-gray-600">{order.city}</p>
-            <p className="mt-1 text-xs text-gray-400">
-              {order.area === "DHAKA" ? "Inside Dhaka" : "Outside Dhaka"}
-            </p>
-          </div>
-
-          <div>
-            <h2 className="mb-2 font-semibold">Payment</h2>
-            <p className="text-gray-600">
-              {PAYMENT_LABEL[order.paymentMethod] ?? order.paymentMethod}
-            </p>
-          </div>
-
-          {order.note && (
             <div>
-              <h2 className="mb-2 font-semibold">Customer note</h2>
-              <p className="text-gray-600">{order.note}</p>
+              <h2 className="mb-2 font-semibold">Payment</h2>
+              <p className="text-gray-600">
+                {PAYMENT_LABEL[order.paymentMethod] ?? order.paymentMethod}
+              </p>
             </div>
-          )}
+          </div>
+
+          <div className="rounded-xl border bg-white p-5 text-sm">
+            <ShippingPanel
+              orderId={order.id}
+              initial={{
+                courier: order.courier ?? "",
+                trackingCode: order.trackingCode ?? "",
+                consignmentId: order.consignmentId ?? "",
+              }}
+            />
+          </div>
+
+          <div className="rounded-xl border bg-white p-5 text-sm">
+            <AdminNotePanel orderId={order.id} initial={order.adminNote ?? ""} />
+          </div>
         </aside>
       </div>
     </div>

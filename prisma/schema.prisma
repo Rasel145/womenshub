@@ -44,6 +44,7 @@ model User {
   passwordResets PasswordReset[]
   wishlist       WishlistItem[]
   reviews        Review[]
+  auditLogs      AuditLog[]
 }
 
 model Category {
@@ -101,7 +102,14 @@ model Order {
   total         Int
   status        OrderStatus   @default(PENDING)
   items         OrderItem[]
+  courier       String?
+  trackingCode  String?
+  consignmentId String?
+  adminNote     String?
+  adminSeenAt   DateTime?
+  events        OrderEvent[]
   createdAt     DateTime      @default(now())
+
 }
 
 model OrderItem {
@@ -170,4 +178,41 @@ model RateLimit {
   key     String @id
   count   Int
   resetAt BigInt // when this counting window ends, in milliseconds
+}
+
+model OrderEvent {
+  id                String       @id @default(cuid())
+  orderId           String
+  order             Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status            OrderStatus?
+  message           String
+  location          String?
+  visibleToCustomer Boolean      @default(true)
+  createdById       String?
+  createdAt         DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+model BlockedPhone {
+  id          String   @id @default(cuid())
+  phone       String   @unique
+  reason      String?
+  createdById String?
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  targetType String?
+  targetId   String?
+  details    String?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
 }

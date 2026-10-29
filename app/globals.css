@@ -111,3 +111,25 @@ html[data-lang="bn"] [data-lb="en"] {
 html[data-lang="bn"] [data-lb="bn"] {
   display: block;
 }
+
+/* Printing invoices and packing slips: hide the website and admin menus */
+@media print {
+  header,
+  footer,
+  .admin-nav,
+  .print-hide {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+

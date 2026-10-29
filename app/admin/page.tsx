@@ -4,13 +4,14 @@ import clsx from "clsx";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { formatPrice } from "@/lib/utils";
+import { getAdminCounts } from "@/lib/admin-counts";
 import { STATUS_LABEL, STATUS_STYLE, type OrderStatus } from "@/lib/order-status";
 import {
   countStalePending,
   WARN_AFTER_HOURS,
   CANCEL_AFTER_HOURS,
-} from "@/lib/order-expiry"; // NEW
-import ExpireOrdersButton from "@/components/admin/ExpireOrdersButton"; // NEW
+} from "@/lib/order-expiry";
+import ExpireOrdersButton from "@/components/admin/ExpireOrdersButton";
 
 export default function AdminDashboardPage() {
   return (
@@ -25,30 +26,31 @@ async function Dashboard() {
 
   const [
     totalOrders,
-    pendingOrders,
+    counts,
     delivered,
     lowStock,
     customers,
     recent,
-    waitingLong, // NEW
-    readyToCancel, // NEW
+    waitingLong,
+    readyToCancel,
   ] = await Promise.all([
     prisma.order.count(),
-    prisma.order.count({ where: { status: "PENDING" } }),
+    getAdminCounts(),
     prisma.order.aggregate({
       _sum: { total: true },
       where: { status: "DELIVERED" },
     }),
     prisma.product.count({ where: { stock: { lte: 5 } } }),
     prisma.user.count({ where: { role: "CUSTOMER" } }),
-    prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
+    prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
     countStalePending(WARN_AFTER_HOURS),
     countStalePending(CANCEL_AFTER_HOURS),
   ]);
 
   const stats = [
+    { label: "New orders (not opened)", value: counts.unseen.toString(), highlight: counts.unseen > 0 },
+    { label: "Pending orders", value: counts.pending.toString(), highlight: counts.pending > 0 },
     { label: "Total orders", value: totalOrders.toString() },
-    { label: "Pending orders", value: pendingOrders.toString(), highlight: pendingOrders > 0 },
     { label: "Delivered revenue", value: formatPrice(delivered._sum.total ?? 0) },
     { label: "Low stock products", value: lowStock.toString(), highlight: lowStock > 0 },
     { label: "Customers", value: customers.toString() },
@@ -58,7 +60,6 @@ async function Dashboard() {
     <div>
       <h1 className="mb-6 text-2xl font-bold">Dashboard</h1>
 
-      {/* NEW: orders that nobody has confirmed for a long time */}
       {waitingLong > 0 && (
         <div className="mb-6 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800">
           <p className="font-medium">
@@ -113,30 +114,41 @@ async function Dashboard() {
           </p>
         ) : (
           <ul className="space-y-2">
-            {recent.map((o) => (
-              <li key={o.id}>
-                <Link
-                  href={`/admin/orders/${o.id}`}
-                  className="flex items-center justify-between rounded-lg border bg-white p-3 text-sm hover:bg-gray-50"
-                >
-                  <div>
-                    <p className="font-medium">#{o.orderNumber}</p>
-                    <p className="text-xs text-gray-500">{o.name}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{formatPrice(o.total)}</p>
-                    <span
-                      className={clsx(
-                        "mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium",
-                        STATUS_STYLE[o.status as OrderStatus]
-                      )}
-                    >
-                      {STATUS_LABEL[o.status as OrderStatus]}
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            ))}
+            {recent.map((o) => {
+              const isNew = o.status === "PENDING" && !o.adminSeenAt;
+
+              return (
+                <li key={o.id}>
+                  <Link
+                    href={`/admin/orders/${o.id}`}
+                    className="flex items-center justify-between rounded-lg border bg-white p-3 text-sm hover:bg-gray-50"
+                  >
+                    <div>
+                      <p className="flex items-center gap-2 font-medium">
+                        #{o.orderNumber}
+                        {isNew && (
+                          <span className="rounded-full bg-pink-600 px-2 py-0.5 text-[10px] font-semibold text-white">
+                            NEW
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-gray-500">{o.name}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{formatPrice(o.total)}</p>
+                      <span
+                        className={clsx(
+                          "mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium",
+                          STATUS_STYLE[o.status as OrderStatus]
+                        )}
+                      >
+                        {STATUS_LABEL[o.status as OrderStatus]}
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
