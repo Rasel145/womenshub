@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import { IMAGE_URL_RE } from "@/lib/storage";
+import { auditAs } from "@/lib/audit";
 
 type ProductInput = {
   name: string;
@@ -106,6 +107,7 @@ function toResult(e: unknown): Result {
 export async function createProduct(input: ProductInput): Promise<Result> {
   await requireAdmin();
 
+    const admin = await requireAdmin();
   try {
     const d = clean(input);
 
@@ -133,6 +135,7 @@ export async function createProduct(input: ProductInput): Promise<Result> {
     return toResult(e);
   }
 
+    await auditAs(admin, "product.create", { details: input.name?.trim().slice(0, 80) });
   revalidatePath("/admin");
   revalidatePath("/admin/products");
   return { ok: true };
@@ -142,7 +145,7 @@ export async function updateProduct(
   id: string,
   input: ProductInput
 ): Promise<Result> {
-  await requireAdmin();
+    const admin = await requireAdmin();
 
   try {
     const d = clean(input);
@@ -171,7 +174,11 @@ export async function updateProduct(
   } catch (e) {
     return toResult(e);
   }
-
+  await auditAs(admin, "product.update", {
+    targetType: "Product",
+    targetId: id,
+    details: `${input.name?.trim().slice(0, 60)}, price ${input.price}, stock ${input.stock}`,
+  });
   revalidatePath("/admin");
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${id}/edit`);

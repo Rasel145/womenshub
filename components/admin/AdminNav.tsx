@@ -10,6 +10,10 @@ import {
   Tags,
   Users,
   MessageSquare,
+  TrendingUp,
+  Ban,
+  History,
+  KeyRound,
   ArrowLeft,
 } from "lucide-react";
 import { useAdminCounts } from "./AdminCounts";
@@ -17,10 +21,14 @@ import { useAdminCounts } from "./AdminCounts";
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag, exact: false },
+  { href: "/admin/reports", label: "Reports", icon: TrendingUp, exact: false },
   { href: "/admin/products", label: "Products", icon: Package, exact: false },
   { href: "/admin/categories", label: "Categories", icon: Tags, exact: false },
   { href: "/admin/customers", label: "Customers", icon: Users, exact: false },
   { href: "/admin/reviews", label: "Reviews", icon: MessageSquare, exact: false },
+  { href: "/admin/blocked", label: "Blocked numbers", icon: Ban, exact: false },
+  { href: "/admin/activity", label: "Activity log", icon: History, exact: false },
+  { href: "/account/security", label: "My security", icon: KeyRound, exact: false },
 ];
 
 export default function AdminNav() {

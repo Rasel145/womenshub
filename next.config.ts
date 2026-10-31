@@ -51,6 +51,7 @@ const nextConfig: NextConfig = {
       { source: "/api/admin/:path*", headers: noStore },
     ];
   },
+    serverExternalPackages: ["exceljs"],
 };
 
 export default nextConfig;

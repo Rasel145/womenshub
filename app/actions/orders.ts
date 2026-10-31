@@ -4,7 +4,12 @@ import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getDeliveryCharge } from "@/lib/delivery";
-import { checkLimits, getClientIp, hashKey, tooManyMessage } from "@/lib/rate-limit";
+import {
+  checkLimits,
+  getClientIp,
+  hashKey,
+  tooManyMessage,
+} from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile"; // NEW
 
 // NEW: one phone number can have at most this many orders waiting for confirmation
@@ -24,7 +29,9 @@ type OrderInput = {
   captchaToken: string; // NEW
 };
 
-type OrderResult = { ok: true; orderNumber: string } | { ok: false; error: string };
+type OrderResult =
+  | { ok: true; orderNumber: string }
+  | { ok: false; error: string };
 
 // Errors with a message that is safe to show to the customer
 class OrderError extends Error {}
@@ -46,18 +53,23 @@ function validate(input: OrderInput) {
       throw new OrderError("Invalid item in your cart.");
   }
 
-  if (customer.name.trim().length < 3) throw new OrderError("Enter your full name.");
+  if (customer.name.trim().length < 3)
+    throw new OrderError("Enter your full name.");
   if (!/^01[3-9]\d{8}$/.test(customer.phone.trim()))
     throw new OrderError("Enter a valid mobile number.");
-  if (customer.address.trim().length < 10) throw new OrderError("Enter your full address.");
-  if (customer.city.trim().length < 2) throw new OrderError("Enter your city or district.");
+  if (customer.address.trim().length < 10)
+    throw new OrderError("Enter your full address.");
+  if (customer.city.trim().length < 2)
+    throw new OrderError("Enter your city or district.");
   if ((customer.note ?? "").length > 300)
     throw new OrderError("Order note is too long.");
 
   if (area !== "dhaka" && area !== "outside")
     throw new OrderError("Invalid delivery area.");
   if (payment !== "cod")
-    throw new OrderError("Online payment is not available yet. Please choose Cash on Delivery.");
+    throw new OrderError(
+      "Online payment is not available yet. Please choose Cash on Delivery.",
+    );
 }
 
 export async function placeOrder(input: OrderInput): Promise<OrderResult> {
@@ -77,6 +89,18 @@ export async function placeOrder(input: OrderInput): Promise<OrderResult> {
     // NEW: the visitor must have passed the "I am not a robot" check
     const captcha = await verifyTurnstile(input.captchaToken);
     if (!captcha.ok) return { ok: false, error: captcha.error };
+
+    // NEW: numbers the store has blocked cannot order
+    const blocked = await prisma.blockedPhone.findUnique({
+      where: { phone: input.customer.phone.trim() },
+      select: { id: true },
+    });
+    if (blocked)
+      return {
+        ok: false,
+        error:
+          "We cannot accept orders from this mobile number. Please contact the store.",
+      };
 
     // NEW: too many orders from one phone number are still waiting for confirmation
     const pending = await prisma.order.count({
@@ -104,14 +128,16 @@ export async function placeOrder(input: OrderInput): Promise<OrderResult> {
         const product = byId.get(item.productId);
         if (!product)
           throw new OrderError(
-            "A product in your cart is no longer available. Please clear your cart and add it again."
+            "A product in your cart is no longer available. Please clear your cart and add it again.",
           );
 
         if (
           product.variants.length > 0 &&
           (!item.variant || !product.variants.includes(item.variant))
         )
-          throw new OrderError(`Please choose a valid option for ${product.name}.`);
+          throw new OrderError(
+            `Please choose a valid option for ${product.name}.`,
+          );
 
         subtotal += product.price * item.quantity;
         return { product, item };
@@ -124,7 +150,9 @@ export async function placeOrder(input: OrderInput): Promise<OrderResult> {
           data: { stock: { decrement: item.quantity } },
         });
         if (result.count === 0)
-          throw new OrderError(`Sorry, ${product.name} does not have enough stock.`);
+          throw new OrderError(
+            `Sorry, ${product.name} does not have enough stock.`,
+          );
       }
 
       const deliveryFee = getDeliveryCharge(subtotal, input.area);

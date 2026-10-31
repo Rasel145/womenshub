@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { formatPrice } from "@/lib/utils";
 import OrderStatusActions from "@/components/admin/OrderStatusActions";
+import CustomerHistory from "@/components/admin/CustomerHistory";
+
 import {
   MarkOrderSeen,
   OrderEditPanel,
@@ -198,6 +200,14 @@ async function OrderContent({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           <div className="rounded-xl border bg-white p-5 text-sm">
+              
+
+             
+              <div className="rounded-xl border bg-white p-5 text-sm">
+            <CustomerHistory phone={order.phone} orderId={order.id} />
+          </div>
+
+
             <ShippingPanel
               orderId={order.id}
               initial={{

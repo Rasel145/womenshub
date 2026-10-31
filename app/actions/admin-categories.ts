@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { auditAs } from "@/lib/audit";
 
 type CategoryInput = {
   name: string;
@@ -59,15 +60,25 @@ async function assertNameFree(name: string, ignoreId?: string) {
 }
 
 export async function createCategory(input: CategoryInput): Promise<Result> {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
+  let createdId = "";
+  let createdName = "";
   try {
     const d = clean(input);
     await assertNameFree(d.name);
-    await prisma.category.create({ data: d });
+    const created = await prisma.category.create({ data: d });
+    createdId = created.id;
+    createdName = d.name;
   } catch (e) {
     return toResult(e);
   }
+
+  await auditAs(admin, "category.create", {
+    targetType: "Category",
+    targetId: createdId,
+    details: createdName,
+  });
 
   revalidatePath("/admin/categories");
   return { ok: true };
@@ -77,15 +88,23 @@ export async function updateCategory(
   id: string,
   input: CategoryInput
 ): Promise<Result> {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
+  let name = "";
   try {
     const d = clean(input);
     await assertNameFree(d.name, id);
     await prisma.category.update({ where: { id }, data: d });
+    name = d.name;
   } catch (e) {
     return toResult(e);
   }
+
+  await auditAs(admin, "category.update", {
+    targetType: "Category",
+    targetId: id,
+    details: name,
+  });
 
   revalidatePath("/admin/categories");
   revalidatePath(`/admin/categories/${id}/edit`);
@@ -93,8 +112,9 @@ export async function updateCategory(
 }
 
 export async function deleteCategory(id: string): Promise<Result> {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
+  let name = "";
   try {
     const products = await prisma.product.count({ where: { categoryId: id } });
     if (products > 0)
@@ -104,7 +124,8 @@ export async function deleteCategory(id: string): Promise<Result> {
         }. Move them to another category first.`
       );
 
-    await prisma.category.delete({ where: { id } });
+    const removed = await prisma.category.delete({ where: { id } });
+    name = removed.name;
   } catch (e) {
     // P2003 = a product was added to this category a moment ago
     if ((e as { code?: string }).code === "P2003")
@@ -114,6 +135,12 @@ export async function deleteCategory(id: string): Promise<Result> {
       };
     return toResult(e);
   }
+
+  await auditAs(admin, "category.delete", {
+    targetType: "Category",
+    targetId: id,
+    details: name,
+  });
 
   revalidatePath("/admin/categories");
   return { ok: true };

@@ -64,3 +64,21 @@ export async function requireAdmin() {
   if (user.role !== "ADMIN") notFound();
   return user;
 }
+
+// Ends every session of this user EXCEPT the one making the request. Returns how many were ended.
+export async function destroyOtherSessions(userId: string) {
+  const token = (await cookies()).get(COOKIE_NAME)?.value;
+  const keep = token ? hashToken(token) : "";
+
+  const result = await prisma.session.deleteMany({
+    where: { userId, NOT: { tokenHash: keep } },
+  });
+  return result.count;
+}
+
+// How many devices are signed in with this account
+export async function countSessions(userId: string) {
+  return prisma.session.count({
+    where: { userId, expiresAt: { gt: new Date() } },
+  });
+}

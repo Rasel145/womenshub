@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getClientIp } from "@/lib/rate-limit";
 
 // Works with the normal client and inside a transaction
 type Db = Pick<typeof prisma, "auditLog">;
@@ -26,4 +27,18 @@ export async function logAudit(
       ip: entry.ip ?? null,
     },
   });
+}
+
+// Shortcut for admin actions: writes the log line with the admin's id and IP address
+export async function auditAs(
+  who: { id: string },
+  action: string,
+  extra: { targetType?: string; targetId?: string; details?: string } = {}
+) {
+  try {
+    await logAudit(prisma, { userId: who.id, action, ...extra, ip: await getClientIp() });
+  } catch (e) {
+    // A problem with the log must never stop the admin's real work
+    console.error("audit log failed:", e);
+  }
 }
