@@ -1,7 +1,7 @@
 import { bn } from "@/lib/i18n/bn";
 
 // Usage: <T>Add to Cart</T>
-// With a changing part: <T vars={{ amount: "৳500" }}>Add {amount} more to get free delivery.</T>
+// With a changing part: <T vars={{ amount: "৳500" }}>{"Add {amount} more"}</T>
 // Works in server and client components. Only one of the two texts is visible (see globals.css).
 export default function T({
   children,
@@ -21,9 +21,9 @@ export default function T({
   if (!bangla) return <>{english}</>;
 
   return (
-    <>
+    <span className="t-pair">
       <span data-l="en">{english}</span>
       <span data-l="bn">{fill(bangla)}</span>
-    </>
+    </span>
   );
 }

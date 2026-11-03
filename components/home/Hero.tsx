@@ -3,12 +3,12 @@ import T from "@/components/i18n/T";
 
 export default function Hero() {
   return (
-    <section className="bg-linear-to-r from-pink-600 to-pink-400">
+    <section className="lang-stable bg-linear-to-r from-pink-600 to-pink-400">
       <div className="mx-auto flex max-w-6xl flex-col items-start gap-5 px-4 py-12 text-white sm:py-16 md:py-20">
-        <h1 className="max-w-xl text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
+        <h1 className="max-w-2xl text-3xl font-bold leading-snug sm:text-4xl md:text-[2.5rem]">
           <T>Beauty you will love, delivered to your door</T>
         </h1>
-        <p className="max-w-lg text-base text-[#fdf2f8] sm:text-lg">
+        <p className="max-w-xl text-base leading-relaxed text-[#fdf2f8] sm:text-lg">
           <T>Skincare, makeup, haircare and more. Pay cash when it arrives.</T>
         </p>
 

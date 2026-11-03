@@ -1,5 +1,7 @@
 import { business as b } from "@/lib/business";
 import { bnNum, type Section } from "@/lib/legal/format";
+import { privacyIntro } from "@/lib/legal/contact";
+
 
 export function privacyContent(): { en: Section[]; bn: Section[] } {
   const years = b.recordRetentionYears;
@@ -8,7 +10,8 @@ export function privacyContent(): { en: Section[]; bn: Section[] } {
     {
       heading: "Who we are",
       paragraphs: [
-        `${b.brand}, operated by ${b.legalName}, is responsible for your personal data on this website. You can contact us at ${b.email} or ${b.phone}.`,
+        // `${b.brand}, operated by ${b.legalName}, is responsible for your personal data on this website. You can contact us at ${b.email} or ${b.phone}.`,
+                privacyIntro("en"),
       ],
     },
     {
@@ -100,7 +103,8 @@ export function privacyContent(): { en: Section[]; bn: Section[] } {
     {
       heading: "আমরা কারা",
       paragraphs: [
-        `${b.legalName} পরিচালিত ${b.brand} এই ওয়েবসাইটে আপনার ব্যক্তিগত তথ্যের দায়িত্বে আছে। আমাদের সঙ্গে যোগাযোগ: ${b.email} বা ${b.phone}।`,
+        // `${b.legalName} পরিচালিত ${b.brand} এই ওয়েবসাইটে আপনার ব্যক্তিগত তথ্যের দায়িত্বে আছে। আমাদের সঙ্গে যোগাযোগ: ${b.email} বা ${b.phone}।`,
+                     privacyIntro("bn"),
       ],
     },
     {

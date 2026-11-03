@@ -1,6 +1,7 @@
 import { business as b } from "@/lib/business";
-import { DELIVERY_CHARGE, FREE_DELIVERY_OVER } from "@/lib/delivery";
+import { DELIVERY_CHARGE } from "@/lib/delivery";
 import { bnNum, type Section } from "@/lib/legal/format";
+import { identityItems, shopIntro, complaintLine } from "@/lib/legal/contact";
 
 export function termsContent(): { en: Section[]; bn: Section[] } {
   const dh = b.deliveryDaysDhaka;
@@ -10,17 +11,19 @@ export function termsContent(): { en: Section[]; bn: Section[] } {
     {
       heading: "Who we are",
       paragraphs: [
-        `${b.brand} is an online shop for beauty and personal care products, operated by ${b.legalName}.`,
+        // `${b.brand} is an online shop for beauty and personal care products, operated by ${b.legalName}.`,
+                shopIntro("en"),
       ],
       items: [
-        `Business address: ${b.address}`,
-        `Phone: ${b.phone}`,
-        `Email: ${b.email}`,
-        `Trade license number: ${b.tradeLicense}`,
-        `TIN: ${b.tin}`,
-        ...(b.bin ? [`VAT registration (BIN): ${b.bin}`] : []),
-        ...(b.ubid ? [`UBID / UBIN / PRA: ${b.ubid}`] : []),
-      ],
+        // `Business address: ${b.address}`,
+        // `Phone: ${b.phone}`,
+        // `Email: ${b.email}`,
+      //   `Trade license number: ${b.tradeLicense}`,
+      //   `TIN: ${b.tin}`,
+      //   ...(b.bin ? [`VAT registration (BIN): ${b.bin}`] : []),
+      //   ...(b.ubid ? [`UBID / UBIN / PRA: ${b.ubid}`] : []),
+            items: identityItems("en"),
+       ],
     },
     {
       heading: "Using this website",
@@ -57,10 +60,8 @@ export function termsContent(): { en: Section[]; bn: Section[] } {
     {
       heading: "Delivery",
       items: [
-        `Delivery charge: ৳${DELIVERY_CHARGE.dhaka} inside Dhaka and ৳${DELIVERY_CHARGE.outside} outside Dhaka. Delivery is free for orders of ৳${FREE_DELIVERY_OVER} or more.`,
-        `After your order is confirmed, delivery inside Dhaka usually takes ${dh.min} to ${dh.max} working days, and outside Dhaka ${out.min} to ${out.max} working days. These are estimates. If there is a delay, we will tell you.`,
-        "You may check the parcel in front of the delivery person before you pay. If the product is wrong or damaged, you may refuse it and tell us.",
-        "If the delivery person cannot reach you after several attempts, the parcel may come back to us and the order may be cancelled.",
+        
+                `Delivery charge: ৳${DELIVERY_CHARGE.dhaka} inside Dhaka and ৳${DELIVERY_CHARGE.outside} outside Dhaka. The charge is added to every order and is shown at checkout before you place the order.`,
       ],
     },
     {
@@ -119,9 +120,11 @@ export function termsContent(): { en: Section[]; bn: Section[] } {
     {
       heading: "Complaints",
       items: [
-        `If you have a problem, contact our complaint officer: ${b.complaintOfficer}, phone ${b.complaintPhone}, email ${b.complaintEmail}.`,
-        "We will reply as soon as possible, and within 72 hours.",
-        "If you are not satisfied, you can also complain to the Directorate of National Consumer Rights Protection (DNCRP).",
+        // `If you have a problem, contact our complaint officer: ${b.complaintOfficer}, phone ${b.complaintPhone}, email ${b.complaintEmail}.`,
+        // "We will reply as soon as possible, and within 72 hours.",
+        // "If you are not satisfied, you can also complain to the Directorate of National Consumer Rights Protection (DNCRP).",
+
+                complaintLine("en"),
       ],
     },
     {
@@ -147,16 +150,19 @@ export function termsContent(): { en: Section[]; bn: Section[] } {
     {
       heading: "আমরা কারা",
       paragraphs: [
-        `${b.brand} সৌন্দর্য ও ব্যক্তিগত যত্নের পণ্যের একটি অনলাইন শপ, যা পরিচালনা করে ${b.legalName}।`,
+        // `${b.brand} সৌন্দর্য ও ব্যক্তিগত যত্নের পণ্যের একটি অনলাইন শপ, যা পরিচালনা করে ${b.legalName}।`,
+                shopIntro("bn"),
       ],
       items: [
-        `ব্যবসার ঠিকানা: ${b.address}`,
-        `ফোন: ${b.phone}`,
-        `ইমেইল: ${b.email}`,
-        `ট্রেড লাইসেন্স নম্বর: ${b.tradeLicense}`,
-        `টিআইএন: ${b.tin}`,
-        ...(b.bin ? [`ভ্যাট নিবন্ধন (বিআইএন): ${b.bin}`] : []),
-        ...(b.ubid ? [`ইউবিআইডি / ইউবিআইএন / পিআরএ: ${b.ubid}`] : []),
+        // `ব্যবসার ঠিকানা: ${b.address}`,
+        // `ফোন: ${b.phone}`,
+        // `ইমেইল: ${b.email}`,
+        // `ট্রেড লাইসেন্স নম্বর: ${b.tradeLicense}`,
+        // `টিআইএন: ${b.tin}`,
+        // ...(b.bin ? [`ভ্যাট নিবন্ধন (বিআইএন): ${b.bin}`] : []),
+        // ...(b.ubid ? [`ইউবিআইডি / ইউবিআইএন / পিআরএ: ${b.ubid}`] : []),
+
+              items: identityItems("bn"),
       ],
     },
     {
@@ -194,10 +200,8 @@ export function termsContent(): { en: Section[]; bn: Section[] } {
     {
       heading: "ডেলিভারি",
       items: [
-        `ডেলিভারি চার্জ: ঢাকার ভেতরে ৳${bnNum(DELIVERY_CHARGE.dhaka)} এবং ঢাকার বাইরে ৳${bnNum(DELIVERY_CHARGE.outside)}। ৳${bnNum(FREE_DELIVERY_OVER)} বা তার বেশি টাকার অর্ডারে ডেলিভারি ফ্রি।`,
-        `অর্ডার নিশ্চিত হওয়ার পর ঢাকার ভেতরে সাধারণত ${bnNum(dh.min)} থেকে ${bnNum(dh.max)} কর্মদিবস এবং ঢাকার বাইরে ${bnNum(out.min)} থেকে ${bnNum(out.max)} কর্মদিবসের মধ্যে ডেলিভারি দেওয়া হয়। এটি আনুমানিক সময়। দেরি হলে আমরা আপনাকে জানাব।`,
-        "টাকা দেওয়ার আগে ডেলিভারি ব্যক্তির সামনে পার্সেল খুলে দেখে নিতে পারবেন। পণ্য ভুল বা ক্ষতিগ্রস্ত হলে গ্রহণ না করে আমাদের জানাতে পারবেন।",
-        "কয়েকবার চেষ্টার পরও ডেলিভারি ব্যক্তি আপনার সঙ্গে যোগাযোগ করতে না পারলে পার্সেল আমাদের কাছে ফেরত আসতে পারে এবং অর্ডার বাতিল হতে পারে।",
+       
+                `ডেলিভারি চার্জ: ঢাকার ভেতরে ৳${bnNum(DELIVERY_CHARGE.dhaka)} এবং ঢাকার বাইরে ৳${bnNum(DELIVERY_CHARGE.outside)}। এই চার্জ প্রতিটি অর্ডারে যোগ হয় এবং অর্ডার করার আগে চেকআউটে দেখানো হয়।`,
       ],
     },
     {
@@ -256,9 +260,10 @@ export function termsContent(): { en: Section[]; bn: Section[] } {
     {
       heading: "অভিযোগ",
       items: [
-        `কোনো সমস্যা হলে আমাদের অভিযোগ কর্মকর্তার সঙ্গে যোগাযোগ করুন: ${b.complaintOfficer}, ফোন ${b.complaintPhone}, ইমেইল ${b.complaintEmail}।`,
-        "আমরা যত দ্রুত সম্ভব, এবং ৭২ ঘণ্টার মধ্যে উত্তর দেব।",
-        "আপনি সন্তুষ্ট না হলে জাতীয় ভোক্তা-অধিকার সংরক্ষণ অধিদপ্তরেও (ডিএনসিআরপি) অভিযোগ করতে পারেন।",
+        // `কোনো সমস্যা হলে আমাদের অভিযোগ কর্মকর্তার সঙ্গে যোগাযোগ করুন: ${b.complaintOfficer}, ফোন ${b.complaintPhone}, ইমেইল ${b.complaintEmail}।`,
+        // "আমরা যত দ্রুত সম্ভব, এবং ৭২ ঘণ্টার মধ্যে উত্তর দেব।",
+        // "আপনি সন্তুষ্ট না হলে জাতীয় ভোক্তা-অধিকার সংরক্ষণ অধিদপ্তরেও (ডিএনসিআরপি) অভিযোগ করতে পারেন।",
+                complaintLine("bn"),
       ],
     },
     {

@@ -40,10 +40,17 @@ export default function LegalDocument({
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8">
       {/* Only shown while you are building the site, never on the live site */}
-      {process.env.NODE_ENV !== "production" && hasPlaceholders() && (
+      {/* {process.env.NODE_ENV !== "production" && hasPlaceholders() && (
         <p className="mb-6 rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800">
           Development note: some business details in lib/business.ts still say
           &quot;YOUR ...&quot;. Fill them in before the website goes live.
+        </p>
+      )} */}
+
+            {process.env.NODE_ENV !== "production" && hasPlaceholders() && (
+        <p className="mb-6 rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800">
+          Development note: your phone number or email is still empty in lib/business.ts.
+          Add them so customers can contact you.
         </p>
       )}
 

@@ -1,27 +1,33 @@
-import { Truck, Wallet, PackageCheck } from "lucide-react";
+import { Truck, Wallet, PackageCheck, type LucideIcon } from "lucide-react";
 import T from "@/components/i18n/T";
-import { formatPrice } from "@/lib/utils";
-import { FREE_DELIVERY_OVER } from "@/lib/delivery";
+import { business as b } from "@/lib/business";
+
+type Item = {
+  icon: LucideIcon;
+  title: string;
+  text: string;
+  vars?: Record<string, string | number>;
+};
 
 export default function TrustStrip() {
-  const items = [
+  const d = b.deliveryDaysDhaka;
+
+  const items: Item[] = [
     {
       icon: Truck,
-      title: "Free Delivery",
-      text: "On orders over {amount}",
-      vars: { amount: formatPrice(FREE_DELIVERY_OVER) },
+      title: "Fast Delivery",
+      text: "{min} to {max} working days inside Dhaka",
+      vars: { min: d.min, max: d.max },
     },
     {
       icon: Wallet,
       title: "Cash on Delivery",
       text: "Pay when you receive your order",
-      vars: undefined,
     },
     {
       icon: PackageCheck,
       title: "Track Your Orders",
       text: "See the status of every order in your account",
-      vars: undefined,
     },
   ];
 

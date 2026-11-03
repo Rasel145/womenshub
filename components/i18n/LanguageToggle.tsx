@@ -28,7 +28,7 @@ export default function LanguageToggle() {
       type="button"
       onClick={toggle}
       aria-label={lang === "bn" ? "Switch to English" : "বাংলায় দেখুন"}
-      className="rounded-full border px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100"
+      className="inline-block min-w-[4.5rem] whitespace-nowrap rounded-full border px-2.5 py-1 text-center text-xs font-medium leading-5 text-gray-700 hover:bg-gray-100"
     >
       {lang === "bn" ? "English" : "বাংলা"}
     </button>

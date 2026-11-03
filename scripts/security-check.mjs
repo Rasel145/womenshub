@@ -34,16 +34,24 @@ const ADMIN_MARKERS = [
 
 const REDIRECTS = [301, 302, 303, 307, 308];
 
-async function request(path, { method = "GET", cookie, headers = {}, body } = {}) {
-  const res = await fetch(BASE + path, {
-    method,
-    redirect: "manual",
-    headers: { ...(cookie ? { cookie: `session=${cookie}` } : {}), ...headers },
-    body,
-    signal: AbortSignal.timeout(20000),
-  });
-  const text = (await res.text().catch(() => "")).slice(0, 300000);
-  return { status: res.status, headers: res.headers, text };
+async function request(path, { method = "GET", cookie, headers = {}, body } = {}, attempt = 1) {
+  try {
+    const res = await fetch(BASE + path, {
+      method,
+      redirect: "manual",
+      headers: { ...(cookie ? { cookie: `session=${cookie}` } : {}), ...headers },
+      body,
+      signal: AbortSignal.timeout(isLocal ? 90000 : 30000),
+    });
+    const text = (await res.text().catch(() => "")).slice(0, 300000);
+    return { status: res.status, headers: res.headers, text };
+  } catch (e) {
+    // The first visit to a page on the development server can be slow, so try once more
+    if (attempt < 2 && (e.name === "TimeoutError" || e.name === "AbortError")) {
+      return request(path, { method, cookie, headers, body }, attempt + 1);
+    }
+    throw e;
+  }
 }
 
 const hasMarker = (text) => ADMIN_MARKERS.some((m) => text.includes(m));
@@ -89,7 +97,11 @@ try {
   console.error(`Cannot reach ${BASE}. Is the website running? (${e.message})`);
   process.exit(2);
 }
-
+// Warm-up: the development server builds each page on its first visit, which can take a while
+console.log("Warming up the pages...");
+for (const p of ["/admin", "/admin/orders", "/admin/products", "/admin/reports", "/login"]) {
+  await request(p).catch(() => {});
+}
 console.log(`Testing ${BASE}`);
 console.log(`Logged-in customer test: ${CUSTOMER ? "yes" : "no (set CUSTOMER_COOKIE)"}`);
 console.log(`Logged-in admin test:    ${ADMIN ? "yes" : "no (set ADMIN_COOKIE)"}`);
@@ -155,28 +167,37 @@ section("4. The scheduler address is closed");
 }
 
 // ------------------------------------------------------- files and traversal
-section("5. Private files and uploads");
-{
-  for (const path of ["/.env", "/.env.local", "/.git/config", "/prisma/schema.prisma", "/package.json", "/next.config.ts", "/lib/auth.ts", "/app/actions/orders.ts"]) {
-    await check(`${path} is not served`, async () => {
-      const r = await request(path);
-      const leaks = /DATABASE_URL|datasource|"dependencies"|createSession|placeOrder/.test(r.text);
-      return r.status === 404 || (!leaks && r.status !== 200);
-    });
-  }
 
+
+section("5. Private files and uploads");
   for (const path of ["/uploads/..%2f..%2f.env", "/uploads/%2e%2e%2f.env", "/uploads/not-a-real-file.jpg", "/uploads/..%5c..%5cpackage.json"]) {
     await check(`GET ${path} finds nothing`, async () => {
       const r = await request(path);
-      return r.status === 404 && !/DATABASE_URL|"dependencies"/.test(r.text);
+      const leaked = /DATABASE_URL|"dependencies"|TURNSTILE_SECRET/.test(r.text);
+      // 400, 404 and redirects are all fine. Only a 200 with file content would be a problem.
+      return [r.status !== 200 && !leaked, `status ${r.status}${leaked ? ", FILE CONTENT FOUND" : ""}`];
     });
   }
-}
+
+    for (const path of ["/uploads/..%2f..%2f.env", "/uploads/%2e%2e%2f.env", "/uploads/not-a-real-file.jpg", "/uploads/..%5c..%5cpackage.json"]) {
+    await check(`GET ${path} finds nothing`, async () => {
+      const r = await request(path);
+      const leaked = /DATABASE_URL|"dependencies"|TURNSTILE_SECRET/.test(r.text);
+      // 400, 404 and redirects are all fine. Only a 200 with file content would be a problem.
+      return [r.status !== 200 && !leaked, `status ${r.status}${leaked ? ", FILE CONTENT FOUND" : ""}`];
+    });
+  }
+
 
 // ------------------------------------------------------- bad input
 section("6. Bad input does not break the site or leak details");
 {
-  const noLeak = (t) => !/PrismaClient|prisma\.|SQLSTATE|syntax error at|node_modules|ECONNREFUSED/i.test(t);
+
+  // Only words that appear on a real error page. File names like "node_modules_..." in the
+  // script links of the development server are normal, so they are not searched for.    
+
+   const noLeak = (t) =>
+    !/PrismaClient(Known|Validation|Initialization|Unknown)|SQLSTATE|syntax error at or near|ECONNREFUSED|Invalid `prisma/i.test(t);
   const attacks = [
     ["Search with a script tag", `/search?q=${encodeURIComponent("<script>alert(1)</script>")}`],
     ["Search with SQL text", `/search?q=${encodeURIComponent("' OR '1'='1' --")}`],

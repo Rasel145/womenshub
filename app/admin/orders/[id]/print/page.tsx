@@ -8,6 +8,8 @@ import { formatPrice } from "@/lib/utils";
 import { business as b } from "@/lib/business";
 import PrintButton from "@/components/admin/PrintButton";
 import { PAYMENT_LABEL, formatDateTime } from "@/lib/order-status";
+import { registrationLine } from "@/lib/legal/contact";
+
 
 export default function PrintPage({
   params,
@@ -66,7 +68,7 @@ async function PrintContent({
 
       <div className="mx-auto max-w-[800px] rounded-xl border border-[#dddddd] bg-[#ffffff] p-8 text-[#111111]">
         <div className="flex flex-wrap justify-between gap-6 border-b border-[#dddddd] pb-5">
-          <div className="text-sm leading-relaxed">
+          {/* <div className="text-sm leading-relaxed">
             <p className="text-xl font-bold">{b.brand}</p>
             <p>{b.legalName}</p>
             <p>{b.address}</p>
@@ -77,6 +79,18 @@ async function PrintContent({
               Trade License: {b.tradeLicense} · TIN: {b.tin}
               {b.bin ? ` · BIN: ${b.bin}` : ""}
             </p>
+          </div> */}
+
+                    <div className="text-sm leading-relaxed">
+            <p className="text-xl font-bold">{b.brand}</p>
+            {b.legalName.trim() && b.legalName !== b.brand && <p>{b.legalName}</p>}
+            {b.address.trim() && <p>{b.address}</p>}
+            {(b.phone.trim() || b.email.trim()) && (
+              <p>{[b.phone.trim(), b.email.trim()].filter(Boolean).join(" · ")}</p>
+            )}
+            {registrationLine() && (
+              <p className="text-xs text-[#555555]">{registrationLine()}</p>
+            )}
           </div>
           <div className="text-right text-sm">
             <p className="text-2xl font-bold">{packing ? "PACKING SLIP" : "INVOICE"}</p>
@@ -177,7 +191,8 @@ async function PrintContent({
         )}
 
         <p className="mt-8 border-t border-[#dddddd] pt-4 text-center text-xs text-[#555555]">
-          Thank you for shopping with {b.brand}. Questions? Call {b.phone}.
+                    Thank you for shopping with {b.brand}.
+          {b.phone.trim() ? ` Questions? Call ${b.phone}.` : ""}
         </p>
       </div>
     </div>

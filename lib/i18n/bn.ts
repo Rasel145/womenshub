@@ -1,9 +1,16 @@
 // English text -> Bangla text. If a text is missing here, the English text is shown.
 export const bn: Record<string, string> = {
   // Header
-  "Free delivery on orders over ৳2000": "৳২০০০-এর উপরে অর্ডারে ফ্রি ডেলিভারি",
-  "Search products, brands...": "পণ্য বা ব্র্যান্ড খুঁজুন...",
-  "Search": "খুঁজুন",
+  // "Free delivery on orders over ৳2000": "৳২০০০-এর উপরে অর্ডারে ফ্রি ডেলিভারি",
+  // "Search products, brands...": "পণ্য বা ব্র্যান্ড খুঁজুন...",
+  // "Search": "খুঁজুন",
+
+    // Delivery
+  "Fast Delivery": "দ্রুত ডেলিভারি",
+  "{min} to {max} working days inside Dhaka": "ঢাকার ভেতরে {min} থেকে {max} কর্মদিবসে",
+  "Calculated at checkout": "চেকআউটে হিসাব হবে",
+  "Delivery charge: {inside} inside Dhaka, {outside} outside Dhaka.":
+    "ডেলিভারি চার্জ: ঢাকার ভেতরে {inside}, ঢাকার বাইরে {outside}।",
 
   // Categories (also used for names that come from the database)
   "Skincare": "স্কিনকেয়ার",

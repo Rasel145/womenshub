@@ -133,3 +133,38 @@ html[data-lang="bn"] [data-lb="bn"] {
   margin: 12mm;
 }
 
+/* Bangla typography: only the font changes. Sizes and line heights stay the same in both
+   languages, so the page layout does not move when the language is switched. */
+html[data-lang="bn"] body {
+  font-family: var(--font-bn), "Nirmala UI", "Noto Sans Bengali", "Kalpurush", Arial, sans-serif;
+}
+
+/* Every <T> wraps its two texts in .t-pair. Normally this wrapper has no effect on layout. */
+.t-pair {
+  display: contents;
+}
+
+/*
+  Stable size: inside the hero section (.lang-stable) and inside every pink button, the English
+  and the Bangla text sit in the SAME grid cell. The box is always as big as the longer text,
+  so switching the language never changes its size. The text that is not selected is hidden
+  with "visibility", which keeps its space but not its looks.
+*/
+.lang-stable .t-pair,
+[class~="bg-pink-600"] .t-pair {
+  display: inline-grid;
+  vertical-align: top;
+}
+
+.lang-stable .t-pair > [data-l],
+[class~="bg-pink-600"] .t-pair > [data-l] {
+  display: block;
+  grid-area: 1 / 1;
+}
+
+html:not([data-lang="bn"]) .lang-stable [data-l="bn"],
+html:not([data-lang="bn"]) [class~="bg-pink-600"] [data-l="bn"],
+html[data-lang="bn"] .lang-stable [data-l="en"],
+html[data-lang="bn"] [class~="bg-pink-600"] [data-l="en"] {
+  visibility: hidden;
+}

@@ -1,8 +1,10 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { Mail, Phone, MapPin } from "lucide-react";
 import T from "@/components/i18n/T";
 import { getCategories } from "@/lib/categories";
 import { business as b } from "@/lib/business";
+import { registrationParts } from "@/lib/legal/contact";
 
 async function FooterCategories() {
   const categories = await getCategories();
@@ -21,6 +23,11 @@ async function FooterCategories() {
 }
 
 export default function Footer() {
+  const phone = b.phone.trim();
+  const email = b.email.trim();
+  const address = b.address.trim();
+  const registration = registrationParts();
+
   return (
     <footer className="mt-12 border-t bg-gray-50">
       <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 text-sm sm:grid-cols-2 lg:grid-cols-4">
@@ -29,6 +36,33 @@ export default function Footer() {
           <p className="text-gray-500">
             <T>Your beauty, delivered.</T>
           </p>
+
+          {(phone || email || address) && (
+            <ul className="mt-4 space-y-2 text-gray-600">
+              {phone && (
+                <li className="flex items-center gap-2">
+                  <Phone size={15} className="shrink-0 text-pink-600" />
+                  <a href={`tel:${phone}`} className="hover:text-pink-600">
+                    {phone}
+                  </a>
+                </li>
+              )}
+              {email && (
+                <li className="flex items-center gap-2">
+                  <Mail size={15} className="shrink-0 text-pink-600" />
+                  <a href={`mailto:${email}`} className="break-all hover:text-pink-600">
+                    {email}
+                  </a>
+                </li>
+              )}
+              {address && (
+                <li className="flex items-start gap-2">
+                  <MapPin size={15} className="mt-0.5 shrink-0 text-pink-600" />
+                  <span>{address}</span>
+                </li>
+              )}
+            </ul>
+          )}
         </div>
 
         <div>
@@ -92,26 +126,22 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Business identity: the digital commerce guidelines ask for this to be shown */}
       <div className="border-t px-4 py-3 text-center text-xs text-gray-400">
         <p>
           © 2026 {b.brand}. <T>All rights reserved.</T>
         </p>
-        <p className="mt-1">
-          {b.legalName} · <T>Trade License</T>: {b.tradeLicense} · <T>TIN</T>: {b.tin}
-          {b.bin ? (
-            <>
-              {" "}
-              · <T>BIN</T>: {b.bin}
-            </>
-          ) : null}
-          {b.ubid ? (
-            <>
-              {" "}
-              · <T>UBID</T>: {b.ubid}
-            </>
-          ) : null}
-        </p>
+
+        {/* Shown only if you fill in your registration numbers in lib/business.ts */}
+        {registration.length > 0 && (
+          <p className="mt-1">
+            {registration.map((p, i) => (
+              <span key={p.label}>
+                {i > 0 && " · "}
+                <T>{p.label}</T>: {p.value}
+              </span>
+            ))}
+          </p>
+        )}
       </div>
     </footer>
   );

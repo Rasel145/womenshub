@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
-import { FREE_DELIVERY_OVER, DELIVERY_CHARGE } from "@/lib/delivery";
+import { DELIVERY_CHARGE } from "@/lib/delivery";
 import T from "@/components/i18n/T";
 
 export default function CartPage() {
@@ -23,9 +23,6 @@ export default function CartPage() {
   }
 
   const subtotal = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
-  const delivery =
-    subtotal === 0 || subtotal >= FREE_DELIVERY_OVER ? 0 : DELIVERY_CHARGE.dhaka;
-  const total = subtotal + delivery;
 
   if (items.length === 0) {
     return (
@@ -136,34 +133,34 @@ export default function CartPage() {
           <h2 className="mb-4 font-semibold">
             <T>Order Summary</T>
           </h2>
+
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
               <dt className="text-gray-500">
                 <T>Subtotal</T>
               </dt>
-              <dd>{formatPrice(subtotal)}</dd>
+              <dd className="font-semibold">{formatPrice(subtotal)}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-gray-500">
                 <T>Delivery</T>
               </dt>
-              <dd>{delivery === 0 ? <T>Free</T> : formatPrice(delivery)}</dd>
-            </div>
-            <div className="flex justify-between border-t pt-3 text-base font-semibold">
-              <dt>
-                <T>Total</T>
-              </dt>
-              <dd className="text-pink-600">{formatPrice(total)}</dd>
+              <dd className="text-gray-500">
+                <T>Calculated at checkout</T>
+              </dd>
             </div>
           </dl>
 
-          {delivery > 0 && (
-            <p className="mt-3 text-xs text-gray-500">
-            <T vars={{ amount: formatPrice(FREE_DELIVERY_OVER - subtotal) }}>
-            {"Add {amount} more to get free delivery."}
+          <p className="mt-3 text-xs text-gray-500">
+            <T
+              vars={{
+                inside: formatPrice(DELIVERY_CHARGE.dhaka),
+                outside: formatPrice(DELIVERY_CHARGE.outside),
+              }}
+            >
+              {"Delivery charge: {inside} inside Dhaka, {outside} outside Dhaka."}
             </T>
-            </p>
-          )}
+          </p>
 
           <Link
             href="/checkout"

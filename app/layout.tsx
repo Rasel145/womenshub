@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -12,6 +12,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Used only when the website is shown in Bangla
+const notoBengali = Noto_Sans_Bengali({
+  variable: "--font-bn",
+  subsets: ["bengali"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -44,7 +51,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: initScript }} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoBengali.variable} flex min-h-screen flex-col antialiased`}
       >
         <Header />
         <div className="flex-1">{children}</div>

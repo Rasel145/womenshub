@@ -7,16 +7,10 @@ import CategoryLinks from "./CategoryLinks";
 import HeaderSearch from "./HeaderSearch";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import LanguageToggle from "@/components/i18n/LanguageToggle";
-import T from "@/components/i18n/T";
 
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b bg-white">
-      {/* Top bar */}
-      <div className="bg-pink-600 py-1.5 text-center text-xs text-white">
-        <T>Free delivery on orders over ৳2000</T>
-      </div>
-
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4">
         <Link href="/" className="text-xl font-bold text-pink-600">
           WomensHub
