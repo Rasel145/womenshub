@@ -19,6 +19,9 @@ interface Props {
 
 const MAX_BYTES = 2 * 1024 * 1024;
 
+const NETWORK_ERROR =
+  "Could not reach the server. Please refresh the page and try again. If it keeps failing, tell the store.";
+
 const inputClass =
   "w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-pink-500";
 
@@ -38,7 +41,7 @@ export default function ProfileForm({ initial }: Props) {
   const [gender, setGender] = useState(initial.gender);
   const [dob, setDob] = useState(initial.dateOfBirth);
   const [currentPassword, setCurrentPassword] = useState("");
-  const [saving, startSave] = useTransition();
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -57,7 +60,7 @@ export default function ProfileForm({ initial }: Props) {
       body.append("file", file);
 
       const res = await fetch("/api/account/avatar", { method: "POST", body });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
         setAvatarError(data.error ?? "Upload failed.");
@@ -76,15 +79,21 @@ export default function ProfileForm({ initial }: Props) {
 
     setAvatarError(null);
     startRemove(async () => {
-      const result = await removeAvatar();
-      if (!result.ok) return setAvatarError(result.error);
-      setAvatar(null);
-      router.refresh();
+      try {
+        const result = await removeAvatar();
+        if (!result.ok) return setAvatarError(result.error);
+        setAvatar(null);
+        router.refresh();
+      } catch {
+        setAvatarError(NETWORK_ERROR);
+      }
     });
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (saving) return;
+
     setError(null);
     setSaved(false);
 
@@ -92,7 +101,8 @@ export default function ProfileForm({ initial }: Props) {
     if (emailChanged && !currentPassword)
       return setError("Enter your current password to change your email.");
 
-    startSave(async () => {
+    setSaving(true);
+    try {
       const result = await updateProfile({
         name,
         email,
@@ -101,12 +111,18 @@ export default function ProfileForm({ initial }: Props) {
         currentPassword,
       });
 
-      if (!result.ok) return setError(result.error);
-
-      setCurrentPassword("");
-      setSaved(true);
-      router.refresh();
-    });
+      if (!result.ok) {
+        setError(result.error);
+      } else {
+        setCurrentPassword("");
+        setSaved(true);
+        router.refresh();
+      }
+    } catch {
+      // The server refused or could not be reached. Without this the button would seem dead.
+      setError(NETWORK_ERROR);
+    }
+    setSaving(false);
   }
 
   return (

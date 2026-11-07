@@ -10,9 +10,10 @@ import {
   hashKey,
   resetLimit,
   tooManyMessage,
-} from "@/lib/rate-limit"; // NEW
+} from "@/lib/rate-limit";
+import { GENDERS, ageFromIsoDate, parseIsoDate } from "@/lib/profile";
 
-type ActionResult = { ok: false; error: string };
+type ActionResult = { ok: true } | { ok: false; error: string };
 
 const PHONE_RE = /^01[3-9]\d{8}$/;
 const EMAIL_RE = /^\S+@\S+\.\S+$/;
@@ -25,13 +26,17 @@ export async function registerAction(input: {
   phone: string;
   email?: string;
   password: string;
+  gender?: string;
+  dateOfBirth?: string;
 }): Promise<ActionResult> {
   const name = input.name?.trim() ?? "";
   const phone = input.phone?.trim() ?? "";
   const email = input.email?.trim().toLowerCase() || undefined;
   const password = input.password ?? "";
+  const gender = input.gender?.trim() ?? "";
+  const dob = input.dateOfBirth?.trim() ?? "";
 
-  // NEW: at most 10 sign-ups per hour from one IP
+  // At most 10 sign-ups per hour from one IP
   const ipKey = hashKey(await getClientIp());
   const limited = await checkLimits([
     { key: `register:ip:${ipKey}`, limit: 10, windowSeconds: 60 * 60 },
@@ -39,6 +44,7 @@ export async function registerAction(input: {
   if (!limited.allowed)
     return { ok: false, error: tooManyMessage(limited.retryAfterSeconds) };
 
+  // Everything is checked here on the server, never trust the browser
   if (name.length < 3 || name.length > 80)
     return { ok: false, error: "Enter your full name." };
   if (!PHONE_RE.test(phone))
@@ -47,6 +53,16 @@ export async function registerAction(input: {
     return { ok: false, error: "Enter a valid email address." };
   if (password.length < 8 || password.length > 128)
     return { ok: false, error: "Password must be 8 to 128 characters." };
+  if (gender && !GENDERS.some((g) => g.value === gender))
+    return { ok: false, error: "Choose a gender from the list." };
+
+  let dateOfBirth: Date | null = null;
+  if (dob) {
+    dateOfBirth = parseIsoDate(dob);
+    const age = ageFromIsoDate(dob);
+    if (!dateOfBirth || age === null || age < 10 || age > 100)
+      return { ok: false, error: "Enter a valid date of birth." };
+  }
 
   const exists: ActionResult = {
     ok: false,
@@ -67,6 +83,8 @@ export async function registerAction(input: {
         phone,
         email: email ?? null,
         passwordHash: await hashPassword(password),
+        gender: gender || null,
+        dateOfBirth,
       },
       select: { id: true },
     });
@@ -78,8 +96,9 @@ export async function registerAction(input: {
     return { ok: false, error: "Something went wrong. Please try again." };
   }
 
+  // The new customer is signed in. The page then uploads the optional photo and goes on.
   await createSession(userId);
-  redirect("/account");
+  return { ok: true };
 }
 
 export async function loginAction(input: {
@@ -97,7 +116,7 @@ export async function loginAction(input: {
 
   if (!identifier || !password || password.length > 128) return invalid;
 
-  // NEW: three limits, checked BEFORE the slow password check
+  // Three limits, checked BEFORE the slow password check
   const ipKey = hashKey(await getClientIp());
   const idKey = hashKey(identifier.toLowerCase());
   const pairKey = `login:ip-id:${ipKey}:${idKey}`;
@@ -120,7 +139,7 @@ export async function loginAction(input: {
   );
   if (!user || !valid) return invalid;
 
-  // NEW: a correct password clears this person's failed-attempt counter
+  // A correct password clears this person's failed-attempt counter
   await resetLimit(pairKey);
 
   await createSession(user.id);
