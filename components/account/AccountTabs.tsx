@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { User as UserIcon, Package, LogOut } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { logoutAction } from "@/app/actions/auth";
+import { ageFromIsoDate, genderLabel } from "@/lib/profile";
 
 type OrderStatus = "PENDING" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 
@@ -19,7 +20,14 @@ interface AccountOrder {
 }
 
 interface Props {
-  user: { name: string; phone: string; email: string | null };
+  user: {
+    name: string;
+    phone: string;
+    email: string | null;
+    gender: string | null;
+    dateOfBirth: string | null; // "2000-05-17"
+    avatarUrl: string | null;
+  };
   orders: AccountOrder[];
 }
 
@@ -40,6 +48,9 @@ const statusStyle: Record<OrderStatus, string> = {
 
 export default function AccountTabs({ user, orders }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
+
+  const age = user.dateOfBirth ? ageFromIsoDate(user.dateOfBirth) : null;
+  const gender = genderLabel(user.gender);
 
   return (
     <div className="flex flex-col gap-6 md:flex-row">
@@ -76,12 +87,33 @@ export default function AccountTabs({ user, orders }: Props) {
       <section className="flex-1 rounded-xl border bg-white p-5">
         {activeTab === "profile" && (
           <div>
-            <h2 className="mb-4 text-lg font-semibold">Profile</h2>
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">Profile</h2>
+              <Link
+                href="/account/profile"
+                className="rounded-lg border px-3 py-1.5 text-sm font-medium text-pink-600 hover:bg-pink-50"
+              >
+                Edit profile
+              </Link>
+            </div>
+
+            <div className="mb-6 flex items-center gap-4">
+              {user.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.avatarUrl}
+                  alt="Your profile photo"
+                  className="h-20 w-20 rounded-full border object-cover"
+                />
+              ) : (
+                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-pink-50 text-2xl font-bold text-pink-600">
+                  {user.name.trim()[0]?.toUpperCase() ?? "?"}
+                </span>
+              )}
+              <p className="text-lg font-semibold">{user.name}</p>
+            </div>
+
             <dl className="space-y-3 text-sm">
-              <div>
-                <dt className="text-gray-500">Name</dt>
-                <dd className="font-medium">{user.name}</dd>
-              </div>
               <div>
                 <dt className="text-gray-500">Mobile number</dt>
                 <dd className="font-medium">{user.phone}</dd>
@@ -89,6 +121,14 @@ export default function AccountTabs({ user, orders }: Props) {
               <div>
                 <dt className="text-gray-500">Email</dt>
                 <dd className="font-medium">{user.email ?? "Not added"}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Gender</dt>
+                <dd className="font-medium">{gender ?? "Not added"}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Age</dt>
+                <dd className="font-medium">{age !== null && age >= 0 ? age : "Not added"}</dd>
               </div>
             </dl>
           </div>

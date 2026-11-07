@@ -54,4 +54,38 @@ const nextConfig: NextConfig = {
     serverExternalPackages: ["exceljs"],
 };
 
+// Only for testing the dev server from a phone through a tunnel. Never applied on the live site.
+if (process.env.NODE_ENV !== "production") {
+  // Hostnames that may open the dev server (no port)
+  nextConfig.allowedDevOrigins = [
+    "192.168.31.35", // your computer on the home network
+    "*.devtunnels.ms",
+    "*.*.devtunnels.ms",
+    "*.trycloudflare.com",
+    "*.ngrok-free.app",
+    "*.ngrok-free.dev",
+    "*.ngrok.io",
+    "*.loca.lt",
+  ];
+
+  // Origins (with port) that may send Server Actions. VS Code Dev Tunnels rewrites the
+  // Origin header to "localhost:3000", so that value has to be listed too.
+  nextConfig.experimental = {
+    ...nextConfig.experimental,
+    serverActions: {
+      allowedOrigins: [
+        "localhost:3000",
+        "127.0.0.1:3000",
+        "192.168.31.35:3000",
+        "*.devtunnels.ms",
+        "*.*.devtunnels.ms",
+        "*.trycloudflare.com",
+        "*.ngrok-free.app",
+        "*.ngrok-free.dev",
+        "*.ngrok.io",
+        "*.loca.lt",
+      ],
+    },
+  };
+}
 export default nextConfig;

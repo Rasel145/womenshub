@@ -17,7 +17,7 @@ export function privacyContent(): { en: Section[]; bn: Section[] } {
     {
       heading: "What information we collect",
       items: [
-        "Account: your name, mobile number, email (optional) and password. Your password is stored only in a scrambled (hashed) form, so we cannot read it.",
+        "Account: your name, mobile number, email (optional) and password. Your password is stored only in a scrambled (hashed) form, so we cannot read it. If you wish, you can also add a gender, a date of birth and a profile photo. These are optional and are shown only to you.",
         "Orders: your name, mobile number, delivery address, city, order note, the products you ordered, delivery area and payment method.",
         "Reviews and wishlist: the reviews you write and the products you save.",
         "Technical information: your IP address (we keep only a scrambled version, to stop abuse such as repeated login attempts), basic browser and device information in our server logs, and the cookies described below.",
@@ -110,7 +110,7 @@ export function privacyContent(): { en: Section[]; bn: Section[] } {
     {
       heading: "আমরা কী তথ্য সংগ্রহ করি",
       items: [
-        "অ্যাকাউন্ট: আপনার নাম, মোবাইল নম্বর, ইমেইল (ঐচ্ছিক) ও পাসওয়ার্ড। পাসওয়ার্ড শুধু এলোমেলো করা (হ্যাশ) আকারে রাখা হয়, তাই আমরা তা পড়তে পারি না।",
+        "অ্যাকাউন্ট: আপনার নাম, মোবাইল নম্বর, ইমেইল (ঐচ্ছিক) ও পাসওয়ার্ড। পাসওয়ার্ড শুধু এলোমেলো করা (হ্যাশ) আকারে রাখা হয়, তাই আমরা তা পড়তে পারি না। চাইলে আপনি লিঙ্গ, জন্ম তারিখ ও প্রোফাইল ছবিও যোগ করতে পারেন। এগুলো ঐচ্ছিক এবং শুধু আপনাকেই দেখানো হয়।",
         "অর্ডার: আপনার নাম, মোবাইল নম্বর, ডেলিভারির ঠিকানা, শহর, অর্ডারের নোট, কী কী পণ্য অর্ডার করেছেন, ডেলিভারি এলাকা ও পেমেন্টের ধরন।",
         "রিভিউ ও পছন্দের তালিকা: আপনার লেখা রিভিউ এবং সংরক্ষণ করা পণ্য।",
         "প্রযুক্তিগত তথ্য: আপনার আইপি ঠিকানা (বারবার লগইনের চেষ্টার মতো অপব্যবহার ঠেকাতে আমরা এর শুধু এলোমেলো করা রূপ রাখি), সার্ভার লগে ব্রাউজার ও ডিভাইসের সাধারণ তথ্য, এবং নিচে বলা কুকি।",

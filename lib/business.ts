@@ -3,10 +3,10 @@ export const business = {
   brand: "WomensHub",
   legalName: "WomensHub",
 
-  // Contact details: customers see these in the footer, the Terms, the Privacy Policy
-  // and on invoices. Fill them in before the website goes live.
-  phone: "", // for example "01XXXXXXXXX"
-  email: "", // for example "support@yourdomain.com"
+  // Contact details: customers see these in the footer (on every page), the Terms,
+  // the Privacy Policy and on invoices.
+  phone: "01310306083",
+  email: "support.womenshub@gmail.com",
   address: "", // optional: your shop address
 
   // Registration numbers. Shown only when you fill them in.
@@ -28,7 +28,7 @@ export const business = {
   recordRetentionYears: 6, // check this number with your lawyer or accountant
 };
 
-export const LEGAL_UPDATED = { en: "31 October 2026", bn: "৩১ অক্টোবর ২০২৬" };
+export const LEGAL_UPDATED = { en: "3 November 2026", bn: "৩ নভেম্বর ২০২৬" };
 
 // True while the contact details are still missing (used only for a note while developing)
 export function hasPlaceholders() {

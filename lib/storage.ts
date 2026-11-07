@@ -1,6 +1,7 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile, unlink } from "node:fs/promises";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
+
 
 // Images live outside /public, so they also work after "next build"
 export const UPLOAD_DIR = process.env.UPLOAD_DIR
@@ -56,5 +57,17 @@ export async function readImage(name: string) {
     return { data, contentType: CONTENT_TYPES[ext] };
   } catch {
     return null;
+  }
+}
+
+// Deletes a stored image file. Only URLs in the exact upload format are accepted,
+// so this can never remove any other file.
+export async function deleteStoredImage(url: string | null | undefined) {
+  if (!url || !IMAGE_URL_RE.test(url)) return;
+
+  try {
+    await unlink(path.join(UPLOAD_DIR, url.slice("/uploads/".length)));
+  } catch {
+    // The file is already gone, which is fine
   }
 }

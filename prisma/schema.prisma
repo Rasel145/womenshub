@@ -45,6 +45,10 @@ model User {
   wishlist       WishlistItem[]
   reviews        Review[]
   auditLogs      AuditLog[]
+  gender         String?
+  dateOfBirth    DateTime? @db.Date
+  avatarUrl      String?
+
 }
 
 model Category {
