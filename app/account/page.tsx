@@ -8,15 +8,22 @@ import AccountTabs from "@/components/account/AccountTabs";
 export default function AccountPage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">My Account</h1>
-        <Link
-          href="/account/security"
-          className="text-sm font-medium text-pink-600 hover:underline"
-        >
-          Password and security
-        </Link>
+
+        <div className="flex flex-wrap items-center gap-4 text-sm font-medium">
+          <Link
+            href="/account/profile"
+            className="rounded-lg bg-pink-600 px-4 py-2 text-white hover:bg-pink-700"
+          >
+            Edit profile
+          </Link>
+          <Link href="/account/security" className="text-pink-600 hover:underline">
+            Password and security
+          </Link>
+        </div>
       </div>
+
       <Suspense fallback={<p className="text-gray-500">Loading...</p>}>
         <AccountContent />
       </Suspense>
@@ -28,11 +35,17 @@ async function AccountContent() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const orders = await prisma.order.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    include: { items: true },
-  });
+  const [profile, orders] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: user.id },
+      select: { gender: true, dateOfBirth: true, avatarUrl: true },
+    }),
+    prisma.order.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      include: { items: true },
+    }),
+  ]);
 
   return (
     <>
@@ -50,7 +63,16 @@ async function AccountContent() {
       )}
 
       <AccountTabs
-        user={{ name: user.name, phone: user.phone, email: user.email }}
+        user={{
+          name: user.name,
+          phone: user.phone,
+          email: user.email,
+          gender: profile?.gender ?? null,
+          dateOfBirth: profile?.dateOfBirth
+            ? profile.dateOfBirth.toISOString().slice(0, 10)
+            : null,
+          avatarUrl: profile?.avatarUrl ?? null,
+        }}
         orders={orders.map((o) => ({
           id: o.id,
           orderNumber: o.orderNumber,
