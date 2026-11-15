@@ -6,7 +6,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import PasswordInput from "@/components/ui/PasswordInput";
 import { registerAction } from "@/app/actions/auth";
-import { GENDERS, ageFromIsoDate, todayIso } from "@/lib/profile";
+import { GENDERS, ageFromIsoDate } from "@/lib/profile";
 
 interface FormState {
   name: string;
@@ -230,7 +230,7 @@ export default function RegisterPage() {
                 value={form.dob}
                 onChange={(e) => update("dob", e.target.value)}
                 min="1920-01-01"
-                max={todayIso()}
+                // max={todayIso()}
                 autoComplete="bday"
                 className={inputClass("dob")}
               />

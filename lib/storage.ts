@@ -43,7 +43,7 @@ export function detectImageExt(buf: Buffer): ImageExt | null {
 export async function saveImage(buf: Buffer, ext: ImageExt) {
   await mkdir(UPLOAD_DIR, { recursive: true });
   const name = `${randomBytes(16).toString("hex")}.${ext}`;
-  await writeFile(path.join(UPLOAD_DIR, name), buf);
+    await writeFile(path.join(/*turbopackIgnore: true*/ UPLOAD_DIR, name), buf);
   return `/uploads/${name}`;
 }
 
@@ -52,7 +52,7 @@ export async function readImage(name: string) {
   if (!FILE_NAME_RE.test(name)) return null;
 
   try {
-    const data = await readFile(path.join(UPLOAD_DIR, name));
+    const data = await readFile(path.join(/*turbopackIgnore: true*/UPLOAD_DIR, name));
     const ext = name.split(".")[1] as ImageExt;
     return { data, contentType: CONTENT_TYPES[ext] };
   } catch {
@@ -66,7 +66,7 @@ export async function deleteStoredImage(url: string | null | undefined) {
   if (!url || !IMAGE_URL_RE.test(url)) return;
 
   try {
-    await unlink(path.join(UPLOAD_DIR, url.slice("/uploads/".length)));
+    await unlink(path.join(/*turbopackIgnore: true*/UPLOAD_DIR, url.slice("/uploads/".length)));
   } catch {
     // The file is already gone, which is fine
   }

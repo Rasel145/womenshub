@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import PasswordInput from "@/components/ui/PasswordInput";
 import { updateProfile, removeAvatar } from "@/app/actions/profile";
-import { GENDERS, ageFromIsoDate, todayIso } from "@/lib/profile";
+import { GENDERS, ageFromIsoDate } from "@/lib/profile";
 
 interface Props {
   initial: {
@@ -276,7 +276,7 @@ export default function ProfileForm({ initial }: Props) {
               value={dob}
               onChange={(e) => setDob(e.target.value)}
               min="1920-01-01"
-              max={todayIso()}
+              // max={todayIso()}
               className={inputClass}
             />
             {age !== null && age >= 0 && (

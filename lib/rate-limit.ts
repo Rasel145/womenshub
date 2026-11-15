@@ -11,16 +11,27 @@ export function hashKey(value: string) {
 }
 
 // The visitor's IP address.
-// These headers are only trustworthy when the server can be reached ONLY through
-// your reverse proxy (Cloudflare / Nginx), which sets them. We set that up when deploying.
+// Set TRUSTED_PROXY to "vercel" when hosting on Vercel, or "cloudflare" when the server
+// sits behind Cloudflare. Only the header that your own host sets can be trusted,
+// because visitors can fake all the other headers.
 export async function getClientIp() {
   const h = await headers();
-  return (
-    h.get("cf-connecting-ip") ||
-    h.get("x-real-ip") ||
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    "unknown"
-  );
+  const mode = process.env.TRUSTED_PROXY;
+
+  if (mode === "vercel") {
+    return (
+      h.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
+      h.get("x-real-ip") ||
+      "unknown"
+    );
+  }
+
+  if (mode === "cloudflare") {
+    return h.get("cf-connecting-ip") || "unknown";
+  }
+
+  // Local development: the real IP is not needed
+  return "unknown";
 }
 
 // Counts one attempt for this key. The whole update is ONE database statement,

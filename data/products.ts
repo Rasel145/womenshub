@@ -1,4 +1,4 @@
-// import { Product } from "@/types";
+import { Product } from "@/types";
 
 // export const products: Product[] = [
 //   { id: "1", slug: "cetaphil-gentle-cleanser", name: "Gentle Skin Cleanser 250ml", brand: "Cetaphil", category: "skincare", price: 1250, oldPrice: 1450, rating: 4.7, reviewCount: 128, inStock: true },
