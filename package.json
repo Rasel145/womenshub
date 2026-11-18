@@ -38,3 +38,5 @@
     "typescript": "^5"
   }
 }
+"postinstall": "prisma generate",
+"build": "prisma generate && next build",
