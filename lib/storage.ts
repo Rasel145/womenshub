@@ -1,6 +1,12 @@
 import { mkdir, readFile, writeFile, unlink } from "node:fs/promises";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
+import {
+  cloudinaryConfigured,
+  uploadImageToCloudinary,
+  deleteFromCloudinary,
+  isCloudinaryUrl,
+} from "@/lib/cloudinary";
 
 
 // Images live outside /public, so they also work after "next build"
@@ -41,6 +47,10 @@ export function detectImageExt(buf: Buffer): ImageExt | null {
 }
 
 export async function saveImage(buf: Buffer, ext: ImageExt) {
+    // On the live site the picture goes to Cloudinary instead of the disk
+  if (cloudinaryConfigured()) return uploadImageToCloudinary(buf, ext);
+  if (process.env.VERCEL)
+    throw new Error("Image storage is not set up. Add CLOUDINARY_URL in the Vercel settings.");
   await mkdir(UPLOAD_DIR, { recursive: true });
   const name = `${randomBytes(16).toString("hex")}.${ext}`;
     await writeFile(path.join(/*turbopackIgnore: true*/ UPLOAD_DIR, name), buf);
@@ -60,14 +70,26 @@ export async function readImage(name: string) {
   }
 }
 
-// Deletes a stored image file. Only URLs in the exact upload format are accepted,
-// so this can never remove any other file.
+// Deletes a stored picture: on Cloudinary, or on the disk. Only pictures in the exact upload
+// format are accepted, so this can never remove any other file.
 export async function deleteStoredImage(url: string | null | undefined) {
-  if (!url || !IMAGE_URL_RE.test(url)) return;
+  if (!url) return;
+
+  if (isCloudinaryUrl(url)) {
+    await deleteFromCloudinary(url);
+    return;
+  }
+
+  if (!IMAGE_URL_RE.test(url)) return;
 
   try {
-    await unlink(path.join(/*turbopackIgnore: true*/UPLOAD_DIR, url.slice("/uploads/".length)));
+    await unlink(path.join(/*turbopackIgnore: true*/ UPLOAD_DIR, url.slice("/uploads/".length)));
   } catch {
     // The file is already gone, which is fine
   }
+}
+
+// True for a picture of this shop, whether it is on Cloudinary or on the disk
+export function isStoredImageUrl(url: string) {
+  return IMAGE_URL_RE.test(url) || isCloudinaryUrl(url);
 }
